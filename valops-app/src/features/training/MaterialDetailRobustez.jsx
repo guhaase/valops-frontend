@@ -8,6 +8,40 @@ import {
 import trainingService from '../../services/trainingService';
 import config from '../../config';
 
+/**
+ * Função auxiliar para construir a URL correta do vídeo
+ * @param {string} contentUrl - URL do conteúdo do vídeo
+ * @param {object} timestamp - Timestamp opcional para evitar cache
+ * @returns {string} URL completa do vídeo
+ */
+function buildVideoUrl(contentUrl, timestamp = null) {
+  // Se já for uma URL completa (http/https), retorna como está
+  if (contentUrl?.startsWith('http')) {
+    return timestamp ? `${contentUrl}?t=${timestamp}` : contentUrl;
+  }
+  
+  // Se o path for undefined ou null, usa um path padrão
+  let path = contentUrl || '/videos/robustez.mp4';
+  
+  // Remove prefixos duplicados de "/treinamentos"
+  if (path.startsWith('/treinamentos/')) {
+    path = path.substring('/treinamentos/'.length);
+  } else if (path.startsWith('/treinamentos')) {
+    path = path.substring('/treinamentos'.length);
+  }
+  
+  // Se o caminho não começar com "/", adicione-o
+  if (path && !path.startsWith('/')) {
+    path = '/' + path;
+  }
+  
+  // Constrói a URL final
+  const baseUrl = `${config.api.baseUrl}/treinamentos${path}`;
+  
+  // Adiciona timestamp se fornecido
+  return timestamp ? `${baseUrl}?t=${timestamp}` : baseUrl;
+}
+
 const MaterialDetailRobustez = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -39,7 +73,7 @@ const MaterialDetailRobustez = () => {
     view_count: viewCount || 2, // Usar o estado viewCount como fonte de verdade
     publish_date: "2025-03-15",
     file_path: "/videos/robustez.mp4",
-    content_url: "/treinamentos/videos/robustez.mp4",
+    content_url: "/videos/robustez.mp4",
     preview_content: "Este vídeo explica como testar a robustez de modelos preditivos e por que ela é essencial para sistemas de IA confiáveis em produção.",
     tags: [
       { id: 1, name: "Validação" },
@@ -266,11 +300,9 @@ const MaterialDetailRobustez = () => {
   const renderMedia = () => {
     console.log("Renderizando vídeo com URL:", material.content_url);
     
-    // Garantir que a URL está completa
-    const videoUrl = material.content_url?.startsWith('http') 
-      ? material.content_url 
-      : `${config.api.baseUrl}${material.content_url}`;
-      
+    // Usar a função auxiliar para construir a URL do vídeo
+    const videoUrl = buildVideoUrl(material.content_url);
+    
     console.log("URL final do vídeo:", videoUrl);
     
     return (
@@ -471,9 +503,7 @@ const MaterialDetailRobustez = () => {
                       try {
                         // Construir URL com timestamp para evitar cache
                         const timestamp = new Date().getTime();
-                        const videoUrl = material.content_url?.startsWith('http') 
-                          ? `${material.content_url}?t=${timestamp}` 
-                          : `${config.api.baseUrl}${material.content_url}?t=${timestamp}`;
+                        const videoUrl = buildVideoUrl(material.content_url, timestamp);
                           
                         videoElement.load();
                         
@@ -488,16 +518,12 @@ const MaterialDetailRobustez = () => {
                       } catch (error) {
                         console.error('Erro ao recarregar vídeo:', error);
                         // Tentar abrir em nova janela como fallback
-                        const videoUrl = material.content_url?.startsWith('http') 
-                          ? material.content_url 
-                          : `${config.api.baseUrl}${material.content_url}`;
+                        const videoUrl = buildVideoUrl(material.content_url);
                         window.open(videoUrl, '_blank');
                       }
                     } else {
                       // Construir URL completa e abrir em nova janela se não encontrar o elemento de vídeo
-                      const videoUrl = material.content_url?.startsWith('http') 
-                        ? material.content_url 
-                        : `${config.api.baseUrl}${material.content_url}`;
+                      const videoUrl = buildVideoUrl(material.content_url);
                       window.open(videoUrl, '_blank');
                     }
                   }, 100); // Esperar 100ms para garantir que o DOM foi atualizado
