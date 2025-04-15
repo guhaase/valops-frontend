@@ -1,0 +1,1 @@
+// NotebookCard.jsx - placeholder file

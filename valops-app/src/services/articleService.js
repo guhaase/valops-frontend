@@ -1,0 +1,1 @@
+// articleService.js - placeholder file

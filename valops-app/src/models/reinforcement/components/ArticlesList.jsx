@@ -1,0 +1,1 @@
+// ArticlesList.jsx - placeholder file

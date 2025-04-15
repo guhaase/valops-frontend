@@ -1,0 +1,1 @@
+// ArticleViewer.jsx - placeholder file

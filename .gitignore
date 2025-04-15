@@ -1,0 +1,73 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependencies
+node_modules
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+
+# Build outputs
+dist
+dist-ssr
+*.local
+build/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.development
+.env.production
+.env.test
+
+# Testing
+coverage
+.nyc_output
+
+# Python virtual environment (for tools)
+venv/
+env/
+lib/
+lib64/
+bin/
+pyvenv.cfg
+
+# Docker related
+.dockerignore
+
+# Runtime data
+.next
+.cache
+.screenshots
+out/
+.output
+.vercel
+.turbo
+
+# Misc
+stats.html
+nginx/nginx.conf.backup

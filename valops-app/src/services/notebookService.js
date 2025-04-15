@@ -1,0 +1,1 @@
+// notebookService.js - placeholder file

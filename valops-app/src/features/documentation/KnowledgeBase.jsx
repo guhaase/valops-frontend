@@ -1,0 +1,1 @@
+// KnowledgeBase.jsx - placeholder file
