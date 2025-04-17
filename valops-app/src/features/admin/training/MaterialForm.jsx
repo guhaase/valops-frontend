@@ -30,9 +30,24 @@ const MaterialForm = ({ material, categories, tags, onSave, onCancel, loading })
   useEffect(() => {
     if (material) {
       // Formatar as tags de array para string separada por ponto e vírgula
-      const formattedTags = material.tags && Array.isArray(material.tags)
-        ? material.tags.join(';')
-        : material.tags || '';
+      let formattedTags = '';
+      
+      if (material.tags) {
+        if (Array.isArray(material.tags)) {
+          // Processar array de tags
+          formattedTags = material.tags
+            .map(tag => typeof tag === 'string' ? tag : (tag && typeof tag === 'object' && tag.name ? tag.name : ''))
+            .filter(tag => tag) // Filtrar valores vazios
+            .join(';');
+        } else if (typeof material.tags === 'string') {
+          // Já é uma string
+          formattedTags = material.tags;
+        } else {
+          // Se for outro tipo, deixar em branco
+          console.warn('Formato de tags não reconhecido:', material.tags);
+          formattedTags = '';
+        }
+      }
         
       setFormData({
         title: material.title || '',
@@ -402,21 +417,27 @@ const MaterialForm = ({ material, categories, tags, onSave, onCancel, loading })
               <div className="mt-2">
                 <span className="text-xs text-gray-500">Tags sugeridas: </span>
                 <div className="flex flex-wrap gap-1 mt-1">
-                  {tags.slice(0, 8).map(tag => (
-                    <span 
-                      key={tag} 
-                      className="px-2 py-1 bg-gray-100 text-xs rounded-full cursor-pointer hover:bg-gray-200"
-                      onClick={() => {
-                        const currentTags = formData.tags ? formData.tags.split(';').filter(t => t.trim()) : [];
-                        if (currentTags.length < 4 && !currentTags.includes(tag)) {
-                          const newTags = [...currentTags, tag];
-                          setFormData(prev => ({ ...prev, tags: newTags.join(';') }));
-                        }
-                      }}
-                    >
-                      {tag}
-                    </span>
-                  ))}
+                  {tags.slice(0, 8).map((tag, index) => {
+                    // Garantir que tag é uma string
+                    const tagName = typeof tag === 'string' ? tag : 
+                                  (tag && typeof tag === 'object' && tag.name ? tag.name : `Tag ${index+1}`);
+                    
+                    return (
+                      <span 
+                        key={index}
+                        className="px-2 py-1 bg-gray-100 text-xs rounded-full cursor-pointer hover:bg-gray-200"
+                        onClick={() => {
+                          const currentTags = formData.tags ? formData.tags.split(';').filter(t => t.trim()) : [];
+                          if (currentTags.length < 4 && !currentTags.includes(tagName)) {
+                            const newTags = [...currentTags, tagName];
+                            setFormData(prev => ({ ...prev, tags: newTags.join(';') }));
+                          }
+                        }}
+                      >
+                        {tagName}
+                      </span>
+                    );
+                  })}
                 </div>
               </div>
             )}

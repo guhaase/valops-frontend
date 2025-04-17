@@ -416,6 +416,26 @@ const trainingService = {
   createMaterialDescription,
   updateMaterialDescription,
   getMaterialAttachments,
+  addAttachment: async (materialId, formData) => {
+    try {
+      const response = await trainingApi.post(`/training/materials/${materialId}/attachments`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Erro ao adicionar anexo ao material ${materialId}:`, error);
+      throw error;
+    }
+  },
+  deleteAttachment: async (attachmentId) => {
+    try {
+      const response = await trainingApi.delete(`/training/attachments/${attachmentId}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Erro ao excluir anexo ${attachmentId}:`, error);
+      throw error;
+    }
+  },
   createMaterial,
   updateMaterial,
   deleteMaterial,

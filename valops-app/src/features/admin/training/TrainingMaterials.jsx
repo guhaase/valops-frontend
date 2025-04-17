@@ -10,6 +10,10 @@ const TrainingMaterials = () => {
   const [error, setError] = useState(null);
   const [selectedMaterial, setSelectedMaterial] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [showAttachmentsModal, setShowAttachmentsModal] = useState(false);
+  const [selectedAttachments, setSelectedAttachments] = useState([]);
+  const [attachmentFile, setAttachmentFile] = useState(null);
+  const [attachmentDescription, setAttachmentDescription] = useState('');
   const [filters, setFilters] = useState({
     category: '',
     search: '',
@@ -70,6 +74,25 @@ const TrainingMaterials = () => {
     try {
       setLoading(true);
       const materialData = await trainingService.getMaterialDetails(materialId);
+      
+      // Garantir que temos dados válidos
+      if (!materialData) {
+        throw new Error('Não foi possível obter os dados do material');
+      }
+      
+      // Processe as tags para garantir que são strings
+      if (materialData.tags && Array.isArray(materialData.tags)) {
+        materialData.tags = materialData.tags.map(tag => {
+          if (typeof tag === 'string') return tag;
+          if (tag && typeof tag === 'object' && tag.name) return tag.name;
+          return '';
+        }).filter(tag => tag); // Remover tags vazias
+      } else if (materialData.tags && typeof materialData.tags !== 'string') {
+        // Se não for um array nem string, remover
+        console.warn('Formato de tags não reconhecido:', materialData.tags);
+        materialData.tags = [];
+      }
+      
       setSelectedMaterial(materialData);
       setShowForm(true);
     } catch (err) {
@@ -77,6 +100,78 @@ const TrainingMaterials = () => {
       setError(`Erro ao carregar detalhes: ${err.response?.data?.detail || err.message}`);
     } finally {
       setLoading(false);
+    }
+  };
+  
+  // Gerenciar anexos de um material
+  const handleAddAttachments = async (materialId, material) => {
+    try {
+      setLoading(true);
+      setSelectedMaterial(material);
+      
+      // Carregar anexos existentes
+      const attachments = await trainingService.getMaterialAttachments(materialId);
+      setSelectedAttachments(attachments || []);
+      
+      // Mostrar modal
+      setShowAttachmentsModal(true);
+    } catch (err) {
+      console.error('Erro ao carregar anexos:', err);
+      setError(`Erro ao carregar anexos: ${err.response?.data?.detail || err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Adicionar um novo anexo
+  const handleAttachmentSubmit = async () => {
+    if (!attachmentFile || !selectedMaterial) return;
+    
+    try {
+      setLoading(true);
+      
+      const formData = new FormData();
+      formData.append('file', attachmentFile);
+      if (attachmentDescription) {
+        formData.append('description', attachmentDescription);
+      }
+      
+      // Adicionar o anexo
+      const result = await trainingService.addAttachment(selectedMaterial.id, formData);
+      
+      // Atualizar a lista de anexos
+      setSelectedAttachments(prev => [...prev, result]);
+      
+      // Limpar o formulário
+      setAttachmentFile(null);
+      setAttachmentDescription('');
+      
+      setError(null);
+    } catch (err) {
+      console.error('Erro ao adicionar anexo:', err);
+      setError(`Erro ao adicionar anexo: ${err.response?.data?.detail || err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Excluir um anexo
+  const handleDeleteAttachment = async (attachmentId) => {
+    if (window.confirm('Tem certeza que deseja excluir este anexo?')) {
+      try {
+        setLoading(true);
+        await trainingService.deleteAttachment(attachmentId);
+        
+        // Atualizar a lista de anexos
+        setSelectedAttachments(prev => prev.filter(att => att.id !== attachmentId));
+        
+        setError(null);
+      } catch (err) {
+        console.error('Erro ao excluir anexo:', err);
+        setError(`Erro ao excluir anexo: ${err.response?.data?.detail || err.message}`);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -104,11 +199,21 @@ const TrainingMaterials = () => {
     try {
       setLoading(true);
       
+      // Preparar dados para envio - garantir que tags está no formato correto
+      const preparedData = { ...materialData };
+      
+      // Processar tags - converter de string para array se necessário
+      if (typeof preparedData.tags === 'string' && preparedData.tags.trim()) {
+        preparedData.tags = preparedData.tags.split(';')
+          .map(tag => tag.trim())
+          .filter(tag => tag);
+      }
+      
       let result;
       
       if (selectedMaterial) {
         // Atualizar material existente
-        result = await trainingService.updateMaterial(selectedMaterial.id, materialData);
+        result = await trainingService.updateMaterial(selectedMaterial.id, preparedData);
         
         // Atualizar a lista de materiais
         setMaterials(prev => 
@@ -116,7 +221,7 @@ const TrainingMaterials = () => {
         );
       } else {
         // Criar novo material
-        result = await trainingService.createMaterial(materialData);
+        result = await trainingService.createMaterial(preparedData);
         
         // Adicionar à lista de materiais se estiver na mesma página/filtro
         setMaterials(prev => [result, ...prev]);
@@ -303,21 +408,40 @@ const TrainingMaterials = () => {
                             </span>
                           </td>
                           <td className="py-3 px-4 text-center">
-                            <button
-                              onClick={() => handleEditMaterial(material.id)}
-                              className="text-blue-600 hover:text-blue-800 mr-3"
-                              disabled={loading}
-                            >
-                              Editar
-                            </button>
-                            <button
-                              onClick={() => handleDeleteMaterial(material.id)}
-                              className="text-red-600 hover:text-red-800"
-                              disabled={loading}
-                            >
-                              Excluir
-                            </button>
-                            </td>
+                            <div className="flex flex-wrap justify-center space-x-2">
+                              <button
+                                onClick={() => handleEditMaterial(material.id)}
+                                className="text-blue-600 hover:text-blue-800"
+                                disabled={loading}
+                                title="Editar material"
+                              >
+                                Editar
+                              </button>
+                              <button
+                                onClick={() => window.open(`/testing/training/material/${material.id}`, '_blank')}
+                                className="text-green-600 hover:text-green-800"
+                                title="Visualizar material"
+                              >
+                                Ver
+                              </button>
+                              <button
+                                onClick={() => handleAddAttachments(material.id, material)}
+                                className="text-purple-600 hover:text-purple-800"
+                                disabled={loading}
+                                title="Gerenciar anexos"
+                              >
+                                Anexos
+                              </button>
+                              <button
+                                onClick={() => handleDeleteMaterial(material.id)}
+                                className="text-red-600 hover:text-red-800"
+                                disabled={loading}
+                                title="Excluir material"
+                              >
+                                Excluir
+                              </button>
+                            </div>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -350,6 +474,153 @@ const TrainingMaterials = () => {
             )}
           </div>
         </>
+      )}
+      
+      {/* Modal de Anexos */}
+      {showAttachmentsModal && selectedMaterial && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold">
+                Gerenciar Anexos: {selectedMaterial.title}
+              </h2>
+              <button
+                onClick={() => setShowAttachmentsModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                Fechar
+              </button>
+            </div>
+            
+            {error && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                <p>{error}</p>
+              </div>
+            )}
+            
+            {/* Formulário para adicionar novo anexo */}
+            <div className="bg-gray-50 p-4 rounded-lg mb-6">
+              <h3 className="text-md font-medium mb-4">Adicionar Novo Anexo</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Arquivo <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="file"
+                    onChange={(e) => setAttachmentFile(e.target.files[0])}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Descrição
+                  </label>
+                  <input
+                    type="text"
+                    value={attachmentDescription}
+                    onChange={(e) => setAttachmentDescription(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                    placeholder="Descrição opcional do anexo"
+                  />
+                </div>
+              </div>
+              <div className="mt-4 flex justify-end">
+                <button
+                  onClick={handleAttachmentSubmit}
+                  disabled={!attachmentFile || loading}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-300"
+                >
+                  {loading ? 'Adicionando...' : 'Adicionar Anexo'}
+                </button>
+              </div>
+            </div>
+            
+            {/* Lista de anexos existentes */}
+            <div>
+              <h3 className="text-md font-medium mb-4">Anexos ({selectedAttachments.length})</h3>
+              
+              {selectedAttachments.length === 0 ? (
+                <p className="text-gray-500 text-center py-4">
+                  Nenhum anexo encontrado para este material.
+                </p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {selectedAttachments.map(attachment => {
+                    // Validamos os dados do anexo
+                    if (!attachment || typeof attachment !== 'object') {
+                      console.error("Anexo inválido:", attachment);
+                      return null; // Não renderizar este item
+                    }
+                    
+                    // Determinar o tipo de arquivo
+                    const originalFilename = typeof attachment.original_filename === 'string' ? attachment.original_filename : '';
+                    const fileExt = originalFilename ? originalFilename.split('.').pop()?.toLowerCase() : '';
+                    let fileType = 'Documento';
+                    
+                    if (fileExt && ['mp4', 'webm', 'avi', 'mov', 'mkv'].includes(fileExt)) {
+                      fileType = 'Vídeo';
+                    } else if (fileExt && ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'].includes(fileExt)) {
+                      fileType = 'Imagem';
+                    } else if (fileExt && ['pdf'].includes(fileExt)) {
+                      fileType = 'PDF';
+                    } else if (fileExt && ['zip', 'rar', '7z', 'tar', 'gz'].includes(fileExt)) {
+                      fileType = 'Arquivo';
+                    }
+                    
+                    return (
+                      <div 
+                        key={attachment.id} 
+                        className="bg-white border border-gray-200 rounded-lg p-4 flex items-start"
+                      >
+                        <div className="flex-grow">
+                          <div className="flex items-center">
+                            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs mr-2">
+                              {fileExt?.toUpperCase() || "Documento"}
+                            </span>
+                            <h4 className="font-medium text-gray-800">{typeof attachment.original_filename === 'string' ? attachment.original_filename : `Anexo ${attachment.id}`}</h4>
+                          </div>
+                          <p className="text-sm text-gray-500 my-1">{typeof attachment.description === 'string' ? attachment.description : "Sem descrição"}</p>
+                          <div className="text-xs text-gray-500">
+                            {attachment.created_at ? 
+                              `Adicionado: ${new Date(attachment.created_at).toLocaleString()}` : 
+                              "Data não disponível"}
+                          </div>
+                        </div>
+                        <div className="flex">
+                          <button
+                            onClick={() => {
+                              // Garantir que temos um caminho de arquivo válido
+                              if (attachment.file_path && typeof attachment.file_path === 'string') {
+                                window.open(`/treinamentos/${selectedMaterial.id}/anexos/${attachment.file_path.split('/').pop()}`, '_blank');
+                              } else {
+                                console.error('Caminho de arquivo inválido:', attachment);
+                                alert('Caminho de arquivo não disponível');
+                              }
+                            }}
+                            className="text-blue-600 hover:text-blue-800 mr-2"
+                            title="Visualizar anexo"
+                          >
+                            Ver
+                          </button>
+                          <button
+                            onClick={() => handleDeleteAttachment(attachment.id)}
+                            className="text-red-600 hover:text-red-800"
+                            disabled={loading}
+                            title="Excluir anexo"
+                          >
+                            Excluir
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
