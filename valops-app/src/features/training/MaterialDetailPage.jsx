@@ -458,7 +458,23 @@ const MaterialDetailPage = () => {
               <div 
                 key={attachment.id} 
                 className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
-                onClick={() => window.open(`/api/training/attachments/${attachment.id}`, '_blank')}
+                onClick={() => {
+                  console.log(`Abrindo anexo ID: ${attachment.id}, caminho: ${attachment.file_path}`);
+                  
+                  // Verificar se temos o file_path e usar ele, ou cair no endpoint de anexos
+                  if (attachment.file_path && attachment.material_id) {
+                    // Construir o caminho usando o link simbólico
+                    const directPath = `/treinamentos/${attachment.material_id}/anexos/${attachment.file_path.split('/').pop()}`;
+                    console.log(`Tentando acessar anexo via caminho direto: ${directPath}`);
+                    window.open(directPath, '_blank');
+                  } else {
+                    // Fallback para o endpoint da API
+                    const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+                    const apiPath = `${baseUrl}/training/attachments/${attachment.id}`;
+                    console.log(`Tentando acessar anexo via API: ${apiPath}`);
+                    window.open(apiPath, '_blank');
+                  }
+                }}
               >
                 <div className="flex items-start">
                   <div className="flex-shrink-0 mr-3">
@@ -852,7 +868,7 @@ const MaterialDetailPage = () => {
                   : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Anexos & Relacionados
+              Anexos
             </button>
           </nav>
         </div>

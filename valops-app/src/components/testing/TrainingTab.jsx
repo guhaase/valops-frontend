@@ -213,9 +213,12 @@ const TrainingTab = () => {
   // Funções para renderizar os cards de materiais por tipo
   const renderVideoCard = (material) => {
     const isLoading = actionLoading[material.id] || false;
-    const thumbnailUrl = material.thumbnail 
-      ? `/api/training/thumbnails/${material.thumbnail}` 
-      : 'https://via.placeholder.com/320x180.png?text=Video';
+    // Construir URL da thumbnail e adicionar log para debug
+    console.log(`Material original:`, material);
+    
+    // Usar o caminho direto para as imagens
+    const thumbnailUrl = `/treinamentos/${material.id}/imagem/thumbnail.png`;
+    
     
     const handleWatch = async () => {
       await trackUsage(material.id, 'view');
@@ -299,9 +302,10 @@ const TrainingTab = () => {
 
   const renderBookCard = (material) => {
     const isLoading = actionLoading[material.id] || false;
-    const thumbnailUrl = material.thumbnail 
-      ? `/api/training/thumbnails/${material.thumbnail}` 
-      : 'https://via.placeholder.com/100x150.png?text=Book';
+    console.log(`Book material:`, material);
+    
+    // Usar o caminho direto para as imagens
+    const thumbnailUrl = `/treinamentos/${material.id}/imagem/thumbnail.png`;
     
     const handleViewDetails = async () => {
       await trackUsage(material.id, 'view');
@@ -316,6 +320,11 @@ const TrainingTab = () => {
               src={thumbnailUrl} 
               alt={material.title}
               className="w-full rounded"
+              onError={(e) => {
+                console.error(`Erro ao carregar imagem: ${thumbnailUrl}`);
+                e.target.src = 'https://via.placeholder.com/100x150.png?text=Book';
+              }}
+              onLoad={() => console.log(`Imagem carregada com sucesso: ${thumbnailUrl}`)}
             />
           </div>
           <div className="flex-grow">
