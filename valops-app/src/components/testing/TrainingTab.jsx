@@ -543,10 +543,6 @@ const TrainingTab = () => {
             <Filter size={16} className="mr-2" />
             Filtros
           </button>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center hover:bg-blue-700">
-            <Plus size={16} className="mr-2" />
-            Adicionar Material
-          </button>
         </div>
       </div>
 
