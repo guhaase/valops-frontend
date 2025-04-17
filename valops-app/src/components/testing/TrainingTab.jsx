@@ -97,7 +97,7 @@ const TrainingTab = () => {
       
       // Carregar materiais com filtros aplicados
       try {
-        const materialsResponse = await trainingService.getTrainingMaterials({
+        const materialsResponse = await trainingService.getMaterials({
           category: activeCategory !== 'all' ? activeCategory : undefined,
           search: searchQuery || undefined,
           level: filters.level || undefined,

@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import adminService from '../../services/adminService';
+import { Tabs, Tab } from '../../components/Tabs';
+import TrainingAdminPanel from './training/TrainingAdminPanel';
 
 const AdminPanel = () => {
   const [admins, setAdmins] = useState([]);
@@ -9,6 +11,7 @@ const AdminPanel = () => {
   const [error, setError] = useState(null);
   const [newAdminMtrc, setNewAdminMtrc] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
+  const [activeTab, setActiveTab] = useState('users');
   const navigate = useNavigate();
 
   // Verificar se o usuário é administrador e carregar a lista
@@ -41,13 +44,15 @@ const AdminPanel = () => {
         if (isAdminRole) {
           setIsAdmin(true);
           
-          // Carrega a lista de administradores
-          try {
-            const adminsList = await adminService.getAllAdmins();
-            setAdmins(adminsList);
-          } catch (listError) {
-            console.error('[AdminPanel] Erro ao carregar lista:', listError);
-            setAdmins([]); // Lista vazia em caso de erro
+          // Carrega a lista de administradores se estiver na aba de usuários
+          if (activeTab === 'users') {
+            try {
+              const adminsList = await adminService.getAllAdmins();
+              setAdmins(adminsList);
+            } catch (listError) {
+              console.error('[AdminPanel] Erro ao carregar lista:', listError);
+              setAdmins([]); // Lista vazia em caso de erro
+            }
           }
         } else {
           // Tenta verificar via API como fallback
@@ -55,11 +60,11 @@ const AdminPanel = () => {
             const adminStatus = await adminService.isCurrentUserAdmin();
             setIsAdmin(adminStatus);
             
-            if (adminStatus) {
+            if (adminStatus && activeTab === 'users') {
               // Carrega a lista de administradores
               const adminsList = await adminService.getAllAdmins();
               setAdmins(adminsList);
-            } else {
+            } else if (!adminStatus) {
               setError('Você não tem permissão para acessar esta página');
               // Redirecionar após 3 segundos
               setTimeout(() => navigate('/'), 3000);
@@ -81,7 +86,7 @@ const AdminPanel = () => {
     };
     
     checkAdminAndLoad();
-  }, [navigate]);
+  }, [navigate, activeTab]);
 
   // Adicionar novo administrador
   const handleAddAdmin = async (e) => {
@@ -140,7 +145,7 @@ const AdminPanel = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Painel de Administradores</h1>
+      <h1 className="text-2xl font-bold mb-6">Painel de Administração</h1>
       
       {/* Mensagem de erro */}
       {error && (
@@ -149,83 +154,94 @@ const AdminPanel = () => {
         </div>
       )}
       
-      {/* Formulário para adicionar novo administrador */}
-      <div className="bg-white shadow-md rounded-lg p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4">Adicionar Novo Administrador</h2>
-        <form onSubmit={handleAddAdmin} className="flex flex-col sm:flex-row gap-4">
-          <input
-            type="text"
-            value={newAdminMtrc}
-            onChange={(e) => setNewAdminMtrc(e.target.value)}
-            className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Matrícula do funcionário"
-            disabled={loading}
-          />
-          <button
-            type="submit"
-            className="bg-blue-600 text-white py-2 px-6 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300"
-            disabled={loading}
-          >
-            {loading ? 'Processando...' : 'Adicionar'}
-          </button>
-        </form>
-      </div>
-      
-      {/* Lista de administradores */}
-      <div className="bg-white shadow-md rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-4">Administradores Cadastrados</h2>
+      {/* Tabs de navegação */}
+      <Tabs activeTab={activeTab} onChange={setActiveTab}>
+        <Tab id="users" label="Administradores">
+          <div className="space-y-6">
+            {/* Formulário para adicionar novo administrador */}
+            <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+              <h2 className="text-xl font-semibold mb-4">Adicionar Novo Administrador</h2>
+              <form onSubmit={handleAddAdmin} className="flex flex-col sm:flex-row gap-4">
+                <input
+                  type="text"
+                  value={newAdminMtrc}
+                  onChange={(e) => setNewAdminMtrc(e.target.value)}
+                  className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Matrícula do funcionário"
+                  disabled={loading}
+                />
+                <button
+                  type="submit"
+                  className="bg-blue-600 text-white py-2 px-6 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300"
+                  disabled={loading}
+                >
+                  {loading ? 'Processando...' : 'Adicionar'}
+                </button>
+              </form>
+            </div>
+            
+            {/* Lista de administradores */}
+            <div className="bg-white shadow-md rounded-lg p-6">
+              <h2 className="text-xl font-semibold mb-4">Administradores Cadastrados</h2>
+              
+              {loading ? (
+                <div className="flex justify-center items-center py-8">
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+                </div>
+              ) : admins.length === 0 ? (
+                <p className="text-gray-500 text-center py-8">
+                  Nenhum administrador cadastrado.
+                </p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full bg-white">
+                    <thead>
+                      <tr className="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
+                        <th className="py-3 px-6 text-left">ID</th>
+                        <th className="py-3 px-6 text-left">Matrícula</th>
+                        <th className="py-3 px-6 text-left">Função</th>
+                        <th className="py-3 px-6 text-left">Criado Em</th>
+                        <th className="py-3 px-6 text-left">Criado Por</th>
+                        <th className="py-3 px-6 text-center">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody className="text-gray-600 text-sm">
+                      {admins.map((admin) => (
+                        <tr key={admin.id} className="border-b border-gray-200 hover:bg-gray-50">
+                          <td className="py-3 px-6">{admin.id}</td>
+                          <td className="py-3 px-6 font-medium">{admin.mtrc}</td>
+                          <td className="py-3 px-6">
+                            <span className={`py-1 px-3 rounded-full text-xs ${
+                              admin.role === 'SUPER' ? 'bg-purple-200 text-purple-800' : 'bg-blue-200 text-blue-800'
+                            }`}>
+                              {admin.role}
+                            </span>
+                          </td>
+                          <td className="py-3 px-6">{new Date(admin.created_at).toLocaleDateString('pt-BR')}</td>
+                          <td className="py-3 px-6">{admin.created_by || '-'}</td>
+                          <td className="py-3 px-6 text-center">
+                            <button
+                              onClick={() => handleRemoveAdmin(admin.mtrc)}
+                              className="text-red-600 hover:text-red-800"
+                              disabled={loading}
+                            >
+                              Remover
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        </Tab>
         
-        {loading ? (
-          <div className="flex justify-center items-center py-8">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
-          </div>
-        ) : admins.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">
-            Nenhum administrador cadastrado.
-          </p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full bg-white">
-              <thead>
-                <tr className="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
-                  <th className="py-3 px-6 text-left">ID</th>
-                  <th className="py-3 px-6 text-left">Matrícula</th>
-                  <th className="py-3 px-6 text-left">Função</th>
-                  <th className="py-3 px-6 text-left">Criado Em</th>
-                  <th className="py-3 px-6 text-left">Criado Por</th>
-                  <th className="py-3 px-6 text-center">Ações</th>
-                </tr>
-              </thead>
-              <tbody className="text-gray-600 text-sm">
-                {admins.map((admin) => (
-                  <tr key={admin.id} className="border-b border-gray-200 hover:bg-gray-50">
-                    <td className="py-3 px-6">{admin.id}</td>
-                    <td className="py-3 px-6 font-medium">{admin.mtrc}</td>
-                    <td className="py-3 px-6">
-                      <span className={`py-1 px-3 rounded-full text-xs ${
-                        admin.role === 'SUPER' ? 'bg-purple-200 text-purple-800' : 'bg-blue-200 text-blue-800'
-                      }`}>
-                        {admin.role}
-                      </span>
-                    </td>
-                    <td className="py-3 px-6">{new Date(admin.created_at).toLocaleDateString('pt-BR')}</td>
-                    <td className="py-3 px-6">{admin.created_by || '-'}</td>
-                    <td className="py-3 px-6 text-center">
-                      <button
-                        onClick={() => handleRemoveAdmin(admin.mtrc)}
-                        className="text-red-600 hover:text-red-800"
-                        disabled={loading}
-                      >
-                        Remover
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+        <Tab id="training" label="Treinamentos">
+          <TrainingAdminPanel />
+        </Tab>
+      </Tabs>
     </div>
   );
 };
