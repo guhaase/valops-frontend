@@ -52,8 +52,26 @@ const notebookService = {
       
       const response = await axios.post('/api/notebooks', formData, config);
       
-      // Usar o mesmo formato de notificação do simulador de teste
-      notebookService.simulateUpload();
+      // Mostrar notificação de sucesso
+      const date = new Date();
+      const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+      
+      toast.success(
+        <div>
+          <strong>Notebook enviado com sucesso!</strong>
+          <div>
+            <span className="font-semibold text-green-700">Matrícula:</span> {matricula}
+          </div>
+          <div>
+            <span className="font-semibold text-green-700">Data/Hora:</span> {formattedDate}
+          </div>
+        </div>,
+        {
+          icon: "📓",
+          className: "success-toast",
+          style: { background: "#ecfdf5", borderLeft: "4px solid #10b981", color: "#065f46" }
+        }
+      );
       
       return response.data;
     } catch (error) {

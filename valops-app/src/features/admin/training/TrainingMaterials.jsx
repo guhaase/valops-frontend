@@ -209,6 +209,21 @@ const TrainingMaterials = () => {
           .filter(tag => tag);
       }
       
+      // Log detalhado para diagnóstico
+      console.log("Enviando material com dados:", {
+        title: preparedData.title,
+        type: preparedData.type,
+        category_id: preparedData.category_id,
+        description: preparedData.description?.substring(0, 50) + "...",
+        level: preparedData.level,
+        author: preparedData.author,
+        url: preparedData.url,
+        publish_date: preparedData.publish_date,
+        tags: preparedData.tags,
+        has_thumbnail: Boolean(preparedData.thumbnail),
+        has_file: Boolean(preparedData.file)
+      });
+      
       let result;
       
       if (selectedMaterial) {
@@ -221,7 +236,20 @@ const TrainingMaterials = () => {
         );
       } else {
         // Criar novo material
-        result = await trainingService.createMaterial(preparedData);
+        try {
+          result = await trainingService.createMaterial(preparedData);
+          console.log("Material criado com sucesso:", result);
+        } catch (createError) {
+          console.error("Erro ao criar material:", {
+            message: createError.message,
+            response: {
+              status: createError.response?.status,
+              statusText: createError.response?.statusText,
+              data: createError.response?.data
+            }
+          });
+          throw createError;
+        }
         
         // Adicionar à lista de materiais se estiver na mesma página/filtro
         setMaterials(prev => [result, ...prev]);
@@ -232,7 +260,23 @@ const TrainingMaterials = () => {
       setError(null);
     } catch (err) {
       console.error('Erro ao salvar material:', err);
-      setError(`Erro ao salvar material: ${err.response?.data?.detail || err.message}`);
+      // Tentar extrair o detalhe do erro para display
+      let errorMessage = err.message;
+      
+      // Verificar se temos detalhes adicionais na resposta
+      if (err.response?.data) {
+        if (typeof err.response.data === 'string') {
+          errorMessage = err.response.data;
+        } else if (err.response.data.detail) {
+          errorMessage = typeof err.response.data.detail === 'string' 
+            ? err.response.data.detail 
+            : JSON.stringify(err.response.data.detail);
+        } else if (err.response.data.message) {
+          errorMessage = err.response.data.message;
+        }
+      }
+      
+      setError(`Erro ao salvar material: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -241,9 +285,13 @@ const TrainingMaterials = () => {
   // Obter o nível em formato legível
   const getLevelLabel = (level) => {
     const levels = {
-      'BASIC': 'Básico',
+      'BEGINNER': 'Iniciante',
       'INTERMEDIATE': 'Intermediário',
-      'ADVANCED': 'Avançado'
+      'ADVANCED': 'Avançado',
+      // For backward compatibility
+      'Iniciante': 'Iniciante',
+      'Intermediário': 'Intermediário',
+      'Avançado': 'Avançado'
     };
     return levels[level] || level;
   };
@@ -253,12 +301,13 @@ const TrainingMaterials = () => {
     const types = {
       'COURSE': 'Curso',
       'VIDEO': 'Vídeo',
-      'ARTICLE': 'Artigo',
-      'BOOK': 'Livro',
-      'PRESENTATION': 'Apresentação',
-      'WEBINAR': 'Webinar',
       'DOCUMENT': 'Documento',
-      'OTHER': 'Outro'
+      'BOOK': 'Livro',
+      // Add lowercase variants for backward compatibility
+      'course': 'Curso',
+      'video': 'Vídeo',
+      'document': 'Documento',
+      'book': 'Livro'
     };
     return types[type] || type;
   };

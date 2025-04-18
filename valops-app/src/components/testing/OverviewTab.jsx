@@ -1,8 +1,32 @@
 // testing/OverviewTab.js
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import ReactWordcloud from 'react-wordcloud';
+import trainingService from '../../services/trainingService';
+
+// Word cloud options
+const wordcloudOptions = {
+  colors: ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b"],
+  enableTooltip: true,
+  deterministic: false,
+  fontFamily: "impact",
+  fontSizes: [14, 42],
+  fontStyle: "normal",
+  fontWeight: "normal",
+  padding: 1,
+  rotations: 3,
+  rotationAngles: [0, 90],
+  scale: "sqrt",
+  spiral: "archimedean",
+  transitionDuration: 1000
+};
 
 const OverviewTab = () => {
+  // Estado para armazenar os dados do tag cloud
+  const [tagCloudData, setTagCloudData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   // Dados simulados para os gráficos
   const testDistributionData = [
     { name: 'Testes Automatizados', value: 72, color: '#3498db' },
@@ -13,6 +37,32 @@ const OverviewTab = () => {
     { name: 'MAIA', value: 85, color: '#1abc9c' },
     { name: 'Thaffarel', value: 15, color: '#9b59b6' }
   ];
+  
+  // Buscar dados da nuvem de tags quando o componente for montado
+  useEffect(() => {
+    const fetchTagCloudData = async () => {
+      try {
+        setLoading(true);
+        const response = await trainingService.getTagCloudData();
+        const tags = response.tags || [];
+        
+        // Transformar os dados para o formato esperado pelo ReactWordcloud
+        const words = tags.map(tag => ({
+          text: tag.name,
+          value: tag.count
+        }));
+        
+        setTagCloudData(words);
+        setLoading(false);
+      } catch (err) {
+        console.error('Erro ao buscar dados da nuvem de tags:', err);
+        setError('Não foi possível carregar os dados da nuvem de tags.');
+        setLoading(false);
+      }
+    };
+    
+    fetchTagCloudData();
+  }, []);
 
   return (
     <div>
@@ -29,53 +79,30 @@ const OverviewTab = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <div className="mb-6">
         <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-          <h4 className="font-semibold text-gray-700 mb-4">Distribuição de Testes</h4>
-          <ResponsiveContainer width="100%" height={250}>
-            <PieChart>
-              <Pie
-                data={testDistributionData}
-                cx="50%"
-                cy="50%"
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-                nameKey="name"
-                label
-              >
-                {testDistributionData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-          <h4 className="font-semibold text-gray-700 mb-4">Ferramentas Automatizadas</h4>
-          <ResponsiveContainer width="100%" height={250}>
-            <PieChart>
-              <Pie
-                data={automatedToolsData}
-                cx="50%"
-                cy="50%"
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-                nameKey="name"
-                label
-              >
-                {automatedToolsData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
+          <h4 className="font-semibold text-gray-700 mb-4">Tags mais utilizadas em Materiais, Artigos e Notebooks</h4>
+          
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+          ) : error ? (
+            <div className="text-center text-red-500 py-8">{error}</div>
+          ) : tagCloudData.length === 0 ? (
+            <div className="text-center text-gray-500 py-8">Nenhuma tag encontrada</div>
+          ) : (
+            <div className="h-72 relative">
+              {/* ReactWordcloud component */}
+              <ReactWordcloud 
+                options={wordcloudOptions}
+                words={tagCloudData}
+              />
+              <div className="text-xs text-gray-500 text-center mt-2">
+                Tamanho da tag representa a frequência de uso
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

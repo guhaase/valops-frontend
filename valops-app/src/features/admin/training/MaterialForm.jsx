@@ -10,7 +10,7 @@ const MaterialForm = ({ material, categories, tags, onSave, onCancel, loading })
     duration: '',
     pages: '',
     author: '',
-    level: 'Iniciante',
+    level: 'BEGINNER', // Usando valor esperado pelo banco de dados
     url: '',
     publish_date: new Date().toISOString().split('T')[0],
     lessons: '',
@@ -49,15 +49,32 @@ const MaterialForm = ({ material, categories, tags, onSave, onCancel, loading })
         }
       }
         
+      // Get the type and ensure it's uppercase
+      const materialType = material.type ? String(material.type).toUpperCase() : 'COURSE';
+      
+      // Map level values to database enum
+      let levelValue = 'BEGINNER'; // default
+      if (material.level) {
+        // Convert string to uppercase for comparison
+        const levelUpper = String(material.level).toUpperCase();
+        if (levelUpper === 'BEGINNER' || levelUpper === 'INICIANTE') {
+          levelValue = 'BEGINNER';
+        } else if (levelUpper === 'INTERMEDIATE' || levelUpper === 'INTERMEDIÁRIO') {
+          levelValue = 'INTERMEDIATE';
+        } else if (levelUpper === 'ADVANCED' || levelUpper === 'AVANÇADO') {
+          levelValue = 'ADVANCED';
+        }
+      }
+      
       setFormData({
         title: material.title || '',
-        type: material.type || 'COURSE',
+        type: materialType,
         category_id: material.category_id || '',
         description: material.description || '',
         duration: material.duration || '',
         pages: material.pages || '',
         author: material.author || '',
-        level: material.level || 'Iniciante',
+        level: levelValue,
         url: material.url || '',
         publish_date: material.publish_date 
           ? new Date(material.publish_date).toISOString().split('T')[0]
@@ -217,12 +234,8 @@ const MaterialForm = ({ material, categories, tags, onSave, onCancel, loading })
             >
               <option value="COURSE">Curso</option>
               <option value="VIDEO">Vídeo</option>
-              <option value="ARTICLE">Artigo</option>
-              <option value="BOOK">Livro</option>
-              <option value="PRESENTATION">Apresentação</option>
-              <option value="WEBINAR">Webinar</option>
               <option value="DOCUMENT">Documento</option>
-              <option value="OTHER">Outro</option>
+              <option value="BOOK">Livro</option>
             </select>
           </div>
           
@@ -304,9 +317,9 @@ const MaterialForm = ({ material, categories, tags, onSave, onCancel, loading })
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             >
-              <option value="Iniciante">Básico</option>
-              <option value="Intermediário">Intermediário</option>
-              <option value="Avançado">Avançado</option>
+              <option value="BEGINNER">Iniciante</option>
+              <option value="INTERMEDIATE">Intermediário</option>
+              <option value="ADVANCED">Avançado</option>
             </select>
           </div>
           

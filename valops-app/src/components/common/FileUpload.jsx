@@ -60,17 +60,13 @@ const FileUpload = ({
     try {
       let result;
       if (type === 'article') {
-        // Usando simulação em vez de upload real para evitar erros no servidor
-        const articleService = await import('../../services/articleService').then(m => m.default);
-        result = articleService.simulateUpload();
+        result = await uploadArticle(localFile, metadata);
       } else if (type === 'notebook') {
-        // Usando simulação em vez de upload real para evitar erros no servidor
-        const notebookService = await import('../../services/notebookService').then(m => m.default);
-        result = notebookService.simulateUpload();
+        result = await uploadNotebook(localFile, metadata);
       }
       
       if (onUploadComplete) {
-        onUploadComplete({id: 'test', success: true});
+        onUploadComplete(result);
       }
     } catch (err) {
       console.error('Erro durante o upload:', err);
@@ -205,18 +201,17 @@ const FileUpload = ({
                   type="button"
                   onClick={async () => {
                     try {
+                      let result;
                       if (type === 'article') {
-                        const articleService = await import('../../services/articleService').then(m => m.default);
-                        articleService.simulateUpload();
+                        result = await uploadArticle(localFile, metadata);
                       } else {
-                        const notebookService = await import('../../services/notebookService').then(m => m.default);
-                        notebookService.simulateUpload();
+                        result = await uploadNotebook(localFile, metadata);
                       }
                       if (onUploadComplete) {
-                        onUploadComplete({id: 'test', success: true});
+                        onUploadComplete(result);
                       }
                     } catch (err) {
-                      console.error('Erro ao simular upload:', err);
+                      console.error('Erro ao realizar upload:', err);
                     }
                   }}
                   className="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"

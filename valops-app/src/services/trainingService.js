@@ -175,64 +175,205 @@ const getMaterialAttachments = async (materialId) => {
 };
 
 const createMaterial = async (materialData) => {
-  // Se materialData contém arquivos, usamos FormData
-  const isFormData = materialData.file || materialData.thumbnail;
+  // Cria uma cópia para evitar modificar o original
+  const cleanedData = { ...materialData };
   
-  let data = materialData;
+  // Garante que o nível está no formato correto para o banco de dados
+  if (cleanedData.level && typeof cleanedData.level === 'string') {
+    // Normaliza para maiúsculas para comparação
+    const levelUpper = cleanedData.level.toUpperCase();
+    
+    // Garante que estamos usando os valores do enum no banco
+    if (levelUpper === 'BEGINNER' || levelUpper === 'INTERMEDIATE' || levelUpper === 'ADVANCED') {
+      cleanedData.level = levelUpper; // Já está no formato correto, só garantir que está em maiúsculas
+    } else if (levelUpper === 'INICIANTE') {
+      cleanedData.level = 'BEGINNER';
+    } else if (levelUpper === 'INTERMEDIÁRIO' || levelUpper === 'INTERMEDIARIO') {
+      cleanedData.level = 'INTERMEDIATE';
+    } else if (levelUpper === 'AVANÇADO' || levelUpper === 'AVANCADO') {
+      cleanedData.level = 'ADVANCED';
+    } else {
+      console.warn(`Valor de nível inválido: ${cleanedData.level}, usando valor padrão INTERMEDIATE`);
+      cleanedData.level = 'INTERMEDIATE';
+    }
+  } else {
+    // Default fallback
+    cleanedData.level = 'INTERMEDIATE';
+  }
+  
+  // Garante que o tipo está no formato correto para o banco
+  if (cleanedData.type && typeof cleanedData.type === 'string') {
+    // Normaliza para maiúsculas
+    cleanedData.type = cleanedData.type.toUpperCase();
+  }
+  
+  // Se materialData contém arquivos, usamos FormData
+  const isFormData = cleanedData.file || cleanedData.thumbnail;
+  
+  let data = cleanedData;
   if (isFormData) {
     data = new FormData();
     
     // Adiciona todos os campos ao FormData
-    Object.keys(materialData).forEach(key => {
-      if (materialData[key] !== undefined && materialData[key] !== null) {
+    Object.keys(cleanedData).forEach(key => {
+      if (cleanedData[key] !== undefined && cleanedData[key] !== null) {
         if (key === 'file' || key === 'thumbnail') {
-          data.append(key, materialData[key]);
-        } else if (key === 'tags' && Array.isArray(materialData[key])) {
-          // Converter array de tags para JSON string
-          data.append(key, JSON.stringify(materialData[key]));
+          data.append(key, cleanedData[key]);
+        } else if (key === 'tags') {
+          // Processar tags de várias maneiras possíveis
+          if (Array.isArray(cleanedData[key])) {
+            // Converter array de tags para JSON string
+            data.append(key, JSON.stringify(cleanedData[key]));
+          } else if (typeof cleanedData[key] === 'string') {
+            // Se já é string, fazer split e formatar como array JSON
+            const tagArray = cleanedData[key].split(';')
+              .map(tag => tag.trim())
+              .filter(tag => tag);
+            data.append(key, JSON.stringify(tagArray));
+          } else {
+            // Caso seja outro tipo ou nulo, passar array vazio
+            data.append(key, JSON.stringify([]));
+          }
         } else {
-          data.append(key, materialData[key]);
+          data.append(key, cleanedData[key]);
         }
       }
     });
   }
   
+  // Adicionar logs detalhados para diagnóstico
+  console.log("Enviando dados para criação de material:", {
+    title: cleanedData.title,
+    type: cleanedData.type,
+    category_id: cleanedData.category_id,
+    level: cleanedData.level,
+    tags: cleanedData.tags,
+    isFormData
+  });
+  
   const config = {
     headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined
   };
   
-  const response = await trainingApi.post('/training/materials', data, config);
-  return response.data;
+  try {
+    const response = await trainingApi.post('/training/materials', data, config);
+    return response.data;
+  } catch (error) {
+    // Log detalhado do erro
+    console.error("Erro ao criar material:", {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message
+    });
+    
+    // Tente extrair mais detalhes se disponíveis
+    if (error.response?.data?.detail) {
+      console.error("Detalhe do erro:", error.response.data.detail);
+    }
+    
+    throw error;
+  }
 };
 
 const updateMaterial = async (materialId, materialData) => {
-  // Mesmo tratamento para FormData que no createMaterial
-  const isFormData = materialData.file || materialData.thumbnail;
+  // Cria uma cópia para evitar modificar o original
+  const cleanedData = { ...materialData };
   
-  let data = materialData;
+  // Garante que o nível está no formato correto para o banco de dados
+  if (cleanedData.level && typeof cleanedData.level === 'string') {
+    // Normaliza para maiúsculas para comparação
+    const levelUpper = cleanedData.level.toUpperCase();
+    
+    // Garante que estamos usando os valores do enum no banco
+    if (levelUpper === 'BEGINNER' || levelUpper === 'INTERMEDIATE' || levelUpper === 'ADVANCED') {
+      cleanedData.level = levelUpper; // Já está no formato correto, só garantir que está em maiúsculas
+    } else if (levelUpper === 'INICIANTE') {
+      cleanedData.level = 'BEGINNER';
+    } else if (levelUpper === 'INTERMEDIÁRIO' || levelUpper === 'INTERMEDIARIO') {
+      cleanedData.level = 'INTERMEDIATE';
+    } else if (levelUpper === 'AVANÇADO' || levelUpper === 'AVANCADO') {
+      cleanedData.level = 'ADVANCED';
+    } else {
+      console.warn(`Valor de nível inválido: ${cleanedData.level}, usando valor padrão INTERMEDIATE`);
+      cleanedData.level = 'INTERMEDIATE';
+    }
+  }
+  
+  // Garante que o tipo está no formato correto para o banco
+  if (cleanedData.type && typeof cleanedData.type === 'string') {
+    // Normaliza para maiúsculas
+    cleanedData.type = cleanedData.type.toUpperCase();
+  }
+  
+  // Se materialData contém arquivos, usamos FormData
+  const isFormData = cleanedData.file || cleanedData.thumbnail;
+  
+  let data = cleanedData;
   if (isFormData) {
     data = new FormData();
     
-    Object.keys(materialData).forEach(key => {
-      if (materialData[key] !== undefined && materialData[key] !== null) {
+    // Adiciona todos os campos ao FormData
+    Object.keys(cleanedData).forEach(key => {
+      if (cleanedData[key] !== undefined && cleanedData[key] !== null) {
         if (key === 'file' || key === 'thumbnail') {
-          data.append(key, materialData[key]);
-        } else if (key === 'tags' && Array.isArray(materialData[key])) {
-          // Converter array de tags para JSON string
-          data.append(key, JSON.stringify(materialData[key]));
+          data.append(key, cleanedData[key]);
+        } else if (key === 'tags') {
+          // Processar tags de várias maneiras possíveis
+          if (Array.isArray(cleanedData[key])) {
+            // Converter array de tags para JSON string
+            data.append(key, JSON.stringify(cleanedData[key]));
+          } else if (typeof cleanedData[key] === 'string') {
+            // Se já é string, fazer split e formatar como array JSON
+            const tagArray = cleanedData[key].split(';')
+              .map(tag => tag.trim())
+              .filter(tag => tag);
+            data.append(key, JSON.stringify(tagArray));
+          } else {
+            // Caso seja outro tipo ou nulo, passar array vazio
+            data.append(key, JSON.stringify([]));
+          }
         } else {
-          data.append(key, materialData[key]);
+          data.append(key, cleanedData[key]);
         }
       }
     });
   }
   
+  // Adicionar logs detalhados para diagnóstico
+  console.log("Enviando dados para atualização de material:", {
+    id: materialId,
+    title: cleanedData.title,
+    type: cleanedData.type,
+    category_id: cleanedData.category_id,
+    level: cleanedData.level,
+    tags: cleanedData.tags,
+    isFormData
+  });
+  
   const config = {
     headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined
   };
   
-  const response = await trainingApi.put(`/training/materials/${materialId}`, data, config);
-  return response.data;
+  try {
+    const response = await trainingApi.put(`/training/materials/${materialId}`, data, config);
+    return response.data;
+  } catch (error) {
+    // Log detalhado do erro
+    console.error("Erro ao atualizar material:", {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message
+    });
+    
+    // Tente extrair mais detalhes se disponíveis
+    if (error.response?.data?.detail) {
+      console.error("Detalhe do erro:", error.response.data.detail);
+    }
+    
+    throw error;
+  }
 };
 
 const deleteMaterial = async (materialId, permanently = false) => {
@@ -445,6 +586,20 @@ const trainingService = {
   getStatistics, // Alias para compatibilidade
   getTrainingTags,
   getFeaturedMaterials,
+  getTagCloudData: async () => {
+    try {
+      const response = await trainingApi.get('/training/statistics/tag-cloud');
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao buscar dados da nuvem de tags:', error);
+      // Se o erro for 404, retorna um objeto vazio em vez de lançar erro
+      if (error.response?.status === 404) {
+        console.warn('Endpoint de nuvem de tags não encontrado, retornando objeto vazio');
+        return { tags: [], total_count: 0 };
+      }
+      throw error;
+    }
+  },
   
   // Avaliações
   getMaterialRatings,
