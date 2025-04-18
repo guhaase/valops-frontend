@@ -4,7 +4,7 @@ import config, { log } from '../config';
 
 // Criar a instância do axios com a URL base
 const apiService = axios.create({
-  baseURL: config.api.baseUrl,
+  baseURL: '/api', // Usando o proxy configurado em package.json
   timeout: config.api.timeout || 30000,
   headers: {
     'Content-Type': 'application/json',
@@ -197,7 +197,11 @@ const login = async (mtrc) => {
   try {
     log.debug('Tentando login com matrícula:', mtrc);
     
-    const response = await apiService.post(config.api.endpoints.login, { mtrc });
+    // Usar URL direta em vez de depender da configuração de endpoint
+    const loginUrl = 'http://localhost:8000/api/login';
+    log.debug('URL de login direto:', loginUrl);
+    
+    const response = await axios.post(loginUrl, { mtrc });
     log.debug('Resposta de login:', response.data);
     
     // Verificar se a resposta contém matrícula
@@ -286,19 +290,23 @@ const apiHelper = {
         const mtrc = localStorage.getItem(config.storage.matriculaKey);
         log.debug('Matrícula antes de criar artigo:', mtrc || 'Nenhuma matrícula');
         
-        // Verificação explícita da matrícula no header da requisição
-        const headers = {
-          'Content-Type': 'multipart/form-data',
-        };
-        
-        if (mtrc) {
-          headers['X-Employee-MTRC'] = mtrc;
-          log.debug('Matrícula adicionada explicitamente aos headers');
-        } else {
+        if (!mtrc) {
           throw new Error('Sem matrícula para criar artigo');
         }
         
-        const response = await apiService.post(config.api.endpoints.articles, formData, { headers });
+        // Verificação explícita da matrícula no header da requisição
+        const headers = {
+          'Content-Type': 'multipart/form-data',
+          'X-Employee-MTRC': mtrc
+        };
+        
+        log.debug('Matrícula adicionada explicitamente aos headers:', mtrc);
+        
+        // Usar o axios padrão diretamente para evitar problemas com a reescrita de path
+        const fullUrl = `${config.api.baseUrl}${config.api.endpoints.articles}`;
+        log.debug('Enviando requisição para URL completa:', fullUrl);
+        
+        const response = await axios.post(fullUrl, formData, { headers });
         log.debug('Artigo criado com sucesso:', response.data);
         return response.data;
       } catch (error) {

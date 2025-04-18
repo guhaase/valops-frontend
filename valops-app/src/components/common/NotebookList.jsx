@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Download, FileText, Plus, Filter, Tag, X, Search } from 'lucide-react';
 import { useTagSelection } from '../../hooks/useTagSelection';
-import { useFileUpload } from '../../hooks/useFileUpload';
+import useFileUpload from '../../hooks/useFileUpload';
 import config, { log } from '../../config'; // Importar configurações centralizadas
 import apiHelper from '../../services/apiService';
 import TagSelector from '../common/TagSelector';

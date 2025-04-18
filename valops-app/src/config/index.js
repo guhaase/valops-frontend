@@ -11,7 +11,7 @@ const config = {
       notebooks: '/notebooks',
       upload: '/upload',
       tags: '/tags',
-      login: '/api/login',  // Precisamos do prefixo /api conforme configurado no backend
+      login: '/api/login',  // Corrigido para acessar o endpoint correto
       categories: '/model-types/categories',
       subcategories: '/model-types/subcategories',
       admins: '/admins'

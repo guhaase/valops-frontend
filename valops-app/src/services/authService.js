@@ -26,16 +26,8 @@ const login = async (mtrc) => {
     log.debug('Enviando requisição de login com:', { mtrc });
     
     // Constrói URL da API com fallbacks seguros
-    let loginUrl;
-    if (config && config.api) {
-      // Use a URL base da configuração, se disponível
-      const baseUrl = config.api.baseUrl || 'http://localhost:8000';
-      const loginEndpoint = config.api.endpoints?.login || '/api/login';
-      loginUrl = `${baseUrl}${loginEndpoint}`;
-    } else {
-      // Fallback seguro
-      loginUrl = 'http://localhost:8000/api/login';
-    }
+    // Usar URL direta para garantir que o endpoint correto seja acessado
+    const loginUrl = 'http://localhost:8000/api/login';
     
     log.debug('URL de login:', loginUrl);
     

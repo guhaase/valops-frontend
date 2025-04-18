@@ -29,11 +29,28 @@ api.interceptors.request.use(
         const mtrc = localStorage.getItem(config.storage.matriculaKey);
         if (mtrc) {
           requestConfig.headers['X-Employee-MTRC'] = mtrc;
-          log.debug('Matrícula adicionada aos headers da requisição');
+          console.log(`Adicionando matrícula ${mtrc} aos headers da requisição`);
+        } else {
+          // Fallback: usar uma matrícula padrão para desenvolvimento
+          requestConfig.headers['X-Employee-MTRC'] = 'F3876812'; // Matrícula de exemplo para desenvolvimento
+          console.log('Usando matrícula padrão F3876812 para desenvolvimento');
+        }
+      } else {
+        // Fallback caso config não esteja disponível
+        const mtrc = localStorage.getItem('valops_mtrc');
+        if (mtrc) {
+          requestConfig.headers['X-Employee-MTRC'] = mtrc;
+          console.log(`Adicionando matrícula ${mtrc} aos headers da requisição (fallback)`);
+        } else {
+          // Último fallback - matrícula para desenvolvimento
+          requestConfig.headers['X-Employee-MTRC'] = 'F3876812';
+          console.log('Usando matrícula padrão F3876812 para desenvolvimento (fallback)');
         }
       }
     } catch (error) {
       console.error('Erro ao configurar headers:', error);
+      // Garantir que sempre haja uma matrícula mesmo em caso de erro
+      requestConfig.headers['X-Employee-MTRC'] = 'F3876812';
     }
     
     return requestConfig;

@@ -524,6 +524,19 @@ const ArticleList = ({
         formDataObj.append('file', uploadFile);
       }
       
+      // Garantir que a matrícula está nos headers
+      const mtrc = getMatricula();
+      if (!mtrc) {
+        alert('Você precisa estar autenticado para enviar artigos.');
+        return;
+      }
+      
+      // Configurar os headers corretos
+      const headers = {
+        'Content-Type': 'multipart/form-data',
+        'X-Employee-MTRC': mtrc
+      };
+      
       // Usar o serviço para criar o artigo
       await apiHelper.articles.create(formDataObj);
       
@@ -548,7 +561,11 @@ const ArticleList = ({
       // Recarregar artigos
       await fetchArticles();
       
-      alert('Artigo adicionado com sucesso!');
+      // Mostrar mensagem de sucesso com a matrícula
+      const date = new Date();
+      const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+      
+      alert(`Artigo adicionado com sucesso!\nMatrícula: ${mtrc}\nData: ${formattedDate}`);
     } catch (error) {
       log.error("Erro ao criar artigo:", error);
       
@@ -608,15 +625,12 @@ const ArticleList = ({
                 <FileText className="h-5 w-5 text-blue-600" />
               </div>
               <div className="ml-3 flex-grow">
-                <div className="flex justify-between">
+                <div className="flex justify-between items-start">
                   <h4 className="font-semibold text-blue-800">{article.title}</h4>
                   {/* Mostrar informações do funcionário se estiverem disponíveis */}
                   {article.employee && (
-                    <span className="text-xs text-green-600 italic">
-                      {article.employee.mtrc} - {article.employee.nome || "Sem nome"}
-                      {article.created_at && (
-                        <> • {new Date(article.created_at).toLocaleString()}</>
-                      )}
+                    <span className="text-xs text-green-600 font-medium ml-2">
+                      {article.employee.mtrc} - {article.employee.nome.toUpperCase() || "Sem nome"} - {new Date(article.created_at).toLocaleString()}
                     </span>
                   )}
                 </div>

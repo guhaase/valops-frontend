@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Layout components
 import Header from './components/layout/Header';
@@ -39,6 +41,9 @@ import MaterialDetailRobustez from './features/training/MaterialDetailRobustez';
 import NotebookList from './components/common/NotebookList';
 import ApiDocs from './features/documentation/ApiDocs';
 import AdminPanel from './features/admin/AdminPanel';
+
+// Teste de notificações
+import TestNotification from './components/common/TestNotification';
 
 // Placeholder components when needed
 const NotebookListFiltered = () => <NotebookList />;
@@ -104,12 +109,25 @@ function App() {
     setShowNotebooks(false);
   };
 
+  // Função para obter os estágios desativados da configuração
+  const getDisabledStages = () => {
+    try {
+      const disabledStagesStr = localStorage.getItem('valops_disabled_stages');
+      if (disabledStagesStr) {
+        return JSON.parse(disabledStagesStr);
+      }
+    } catch (error) {
+      console.error('Erro ao ler estágios desativados:', error);
+    }
+    return [];
+  };
+  
   const renderStageDetails = () => {
-    // Estágios em desenvolvimento
-    const underDevelopmentStages = ['validation', 'implementation'];
+    // Obter estágios desativados da configuração
+    const disabledStages = getDisabledStages();
     
-    // Verificar se o estágio atual está em desenvolvimento
-    if (underDevelopmentStages.includes(currentStage)) {
+    // Verificar se o estágio atual está desativado
+    if (disabledStages.includes(currentStage)) {
       // Renderizar mensagem "Em Breve" em vez do componente
       return (
         <div className="bg-white p-8 rounded-lg shadow-md text-center">
@@ -142,6 +160,10 @@ function App() {
         return <ExtractionStage onClose={handleCloseDetails} />;
       case 'testing':
         return <TestingStage onClose={handleCloseDetails} />;
+      case 'validation':
+        return <ValidationStage onClose={handleCloseDetails} />;
+      case 'implementation':
+        return <ImplementationStage onClose={handleCloseDetails} />;
       default:
         return null;
     }
@@ -179,6 +201,20 @@ function App() {
       {/* <AuthManager /> */}
       
       <div className="min-h-screen flex flex-col">
+        {/* Configure o ToastContainer com tema verde para notificações de upload */}
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
+        
         <Header />
         <main className="flex-grow">
           <Routes>
@@ -199,7 +235,8 @@ function App() {
                 <PageContainer>
                   <div className="p-4">
                     <h1 className="text-2xl font-bold mb-4 text-blue-800">Gestão de Equipes</h1>
-                    <EquipesTab />
+                    {/* Adicionando key com data para forçar remontagem do componente */}
+                    <EquipesTab key={`equipes-${Date.now()}`} />
                   </div>
                 </PageContainer>
               </ManagerRoute>
@@ -302,6 +339,16 @@ function App() {
                   </div>
                 </PageContainer>
               </ProtectedRoute>
+            } />
+            
+            {/* Rota de teste para notificações */}
+            <Route path="/test-notification" element={
+              <PageContainer>
+                <div className="p-4">
+                  <h1 className="text-2xl font-bold mb-4 text-blue-800">Teste de Notificações</h1>
+                  <TestNotification />
+                </div>
+              </PageContainer>
             } />
             
             {/* Redireciona rotas desconhecidas para home */}

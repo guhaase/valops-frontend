@@ -418,7 +418,7 @@ const MaterialDetailRobustez = () => {
         <div className="container mx-auto px-4 py-4">
           <button 
             className="inline-flex items-center text-gray-700 hover:text-blue-600"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/testing/training')}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Voltar para materiais de treinamento

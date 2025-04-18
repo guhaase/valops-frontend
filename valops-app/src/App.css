@@ -45,3 +45,31 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Estilos para os toasts de notificação */
+.success-toast {
+  background-color: #ecfdf5 !important;
+  border-left: 4px solid #10b981 !important;
+  color: #065f46 !important;
+}
+
+/* Estilo para enfatizar a matrícula */
+.success-toast strong {
+  color: #065f46;
+}
+
+/* Animação para a entrada do toast */
+.Toastify__toast--success {
+  animation: slide-in 0.3s ease-out;
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

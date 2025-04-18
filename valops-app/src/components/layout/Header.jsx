@@ -122,7 +122,7 @@ const Header = () => {
               
               {/* Menu "Equipes" - sempre visível conforme solicitado */}
               <Link 
-                to="/equipes" 
+                to={`/equipes?t=${Date.now()}`} 
                 className="text-gray-600 hover:text-gray-900"
               >
                 Equipes

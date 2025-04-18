@@ -1,68 +1,75 @@
+// src/hooks/useFileUpload.js
 import { useState } from 'react';
+import { toast } from 'react-toastify';
+import articleService from '../services/articleService';
+import notebookService from '../services/notebookService';
 
 /**
- * Hook personalizado para gerenciamento de upload de arquivos
- * @param {Array} allowedExtensions - Lista de extensões de arquivo permitidas
- * @returns {Object} Funções e estados para gerenciar upload de arquivos
+ * Hook customizado para gerenciar uploads de arquivos
+ * Fornece funcionalidades para upload de artigos e notebooks
  */
-export const useFileUpload = (allowedExtensions = []) => {
-  const [file, setFile] = useState(null);
-  const [fileName, setFileName] = useState('');
-  const [fileError, setFileError] = useState('');
+const useFileUpload = () => {
+  const [isUploading, setIsUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [error, setError] = useState(null);
 
   /**
-   * Verifica se a extensão do arquivo é permitida
-   * @param {string} filename - Nome do arquivo
-   * @returns {boolean} Verdadeiro se a extensão for permitida
+   * Função para fazer upload de um arquivo de artigo
+   * @param {File} file - Arquivo a ser enviado
+   * @param {Object} metadata - Metadados do arquivo
+   * @returns {Promise} Resultado da operação
    */
-  const isExtensionAllowed = (filename) => {
-    if (!allowedExtensions || allowedExtensions.length === 0) return true;
-    
-    const extension = filename.toLowerCase().slice(filename.lastIndexOf('.'));
-    return allowedExtensions.includes(extension);
+  const uploadArticle = async (file, metadata = {}) => {
+    setIsUploading(true);
+    setProgress(0);
+    setError(null);
+
+    try {
+      const result = await articleService.uploadArticle(file, metadata, (progressPercent) => {
+        setProgress(progressPercent);
+      });
+      
+      setIsUploading(false);
+      return result;
+    } catch (err) {
+      setError(err.message || 'Erro ao enviar arquivo');
+      setIsUploading(false);
+      throw err;
+    }
   };
 
   /**
-   * Manipula mudança de arquivo
-   * @param {Event} e - Evento de mudança de input
+   * Função para fazer upload de um arquivo de notebook
+   * @param {File} file - Arquivo a ser enviado
+   * @param {Object} metadata - Metadados do arquivo
+   * @returns {Promise} Resultado da operação
    */
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    
-    if (!selectedFile) {
-      setFile(null);
-      setFileName('');
-      setFileError('');
-      return;
-    }
-    
-    if (!isExtensionAllowed(selectedFile.name)) {
-      setFileError(`Tipo de arquivo não permitido. Extensões aceitas: ${allowedExtensions.join(', ')}`);
-      setFile(null);
-      setFileName('');
-      return;
-    }
-    
-    setFile(selectedFile);
-    setFileName(selectedFile.name);
-    setFileError('');
-  };
+  const uploadNotebook = async (file, metadata = {}) => {
+    setIsUploading(true);
+    setProgress(0);
+    setError(null);
 
-  /**
-   * Reseta o estado do arquivo
-   */
-  const resetFile = () => {
-    setFile(null);
-    setFileName('');
-    setFileError('');
+    try {
+      const result = await notebookService.uploadNotebook(file, metadata, (progressPercent) => {
+        setProgress(progressPercent);
+      });
+      
+      setIsUploading(false);
+      return result;
+    } catch (err) {
+      setError(err.message || 'Erro ao enviar arquivo');
+      setIsUploading(false);
+      throw err;
+    }
   };
 
   return {
-    file,
-    fileName,
-    fileError,
-    handleFileChange,
-    resetFile,
-    isExtensionAllowed
+    isUploading,
+    progress,
+    error,
+    uploadArticle,
+    uploadNotebook
   };
 };
+
+export default useFileUpload;

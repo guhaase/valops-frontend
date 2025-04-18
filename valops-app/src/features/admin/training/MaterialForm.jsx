@@ -10,7 +10,7 @@ const MaterialForm = ({ material, categories, tags, onSave, onCancel, loading })
     duration: '',
     pages: '',
     author: '',
-    level: 'BASIC',
+    level: 'Iniciante',
     url: '',
     publish_date: new Date().toISOString().split('T')[0],
     lessons: '',
@@ -57,7 +57,7 @@ const MaterialForm = ({ material, categories, tags, onSave, onCancel, loading })
         duration: material.duration || '',
         pages: material.pages || '',
         author: material.author || '',
-        level: material.level || 'BASIC',
+        level: material.level || 'Iniciante',
         url: material.url || '',
         publish_date: material.publish_date 
           ? new Date(material.publish_date).toISOString().split('T')[0]
@@ -130,10 +130,6 @@ const MaterialForm = ({ material, categories, tags, onSave, onCancel, loading })
     
     if (!formData.author.trim()) {
       newErrors.author = 'O autor é obrigatório';
-    }
-    
-    if (!formData.url.trim()) {
-      newErrors.url = 'A URL é obrigatória';
     }
     
     // Validar formato de tags (máximo 4)
@@ -308,31 +304,25 @@ const MaterialForm = ({ material, categories, tags, onSave, onCancel, loading })
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             >
-              <option value="BASIC">Básico</option>
-              <option value="INTERMEDIATE">Intermediário</option>
-              <option value="ADVANCED">Avançado</option>
+              <option value="Iniciante">Básico</option>
+              <option value="Intermediário">Intermediário</option>
+              <option value="Avançado">Avançado</option>
             </select>
           </div>
           
           {/* URL e Data de Publicação */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              URL <span className="text-red-500">*</span>
+              URL
             </label>
             <input
               type="url"
               name="url"
               value={formData.url}
               onChange={handleChange}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.url ? 'border-red-500' : 'border-gray-300'
-              }`}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="URL do material ou página externa"
-              required
             />
-            {errors.url && (
-              <p className="mt-1 text-sm text-red-500">{errors.url}</p>
-            )}
           </div>
           
           <div>

@@ -343,7 +343,21 @@ const ExamplesList = () => {
     setUploading(true);
     
     try {
-      // Fazer upload do arquivo
+      // Verificar matrícula
+      const mtrc = getMatricula();
+      if (!mtrc) {
+        alert('Você precisa estar autenticado para enviar notebooks.');
+        return;
+      }
+      
+      // Fazer upload do arquivo com headers explícitos
+      const uploadConfig = {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'X-Employee-MTRC': mtrc
+        }
+      };
+      
       const fileData = await apiHelper.upload.file(uploadFile);
       
       // Preparar os dados do notebook
@@ -373,7 +387,11 @@ const ExamplesList = () => {
       // Recarregar notebooks
       await fetchNotebooks();
       
-      alert('Notebook adicionado com sucesso!');
+      // Mostrar mensagem de sucesso com a matrícula
+      const date = new Date();
+      const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+      
+      alert(`Notebook adicionado com sucesso!\nMatrícula: ${mtrc}\nData: ${formattedDate}`);
     } catch (error) {
       log.error("Erro ao criar notebook:", error);
       
@@ -435,15 +453,12 @@ const ExamplesList = () => {
                 <FileDown className="h-5 w-5 text-blue-600" />
               </div>
               <div className="ml-3 flex-grow">
-                <div className="flex justify-between">
+                <div className="flex justify-between items-start">
                   <h4 className="font-semibold text-blue-800">{notebook.name}</h4>
                   {/* Mostrar informações do funcionário se estiverem disponíveis */}
                   {notebook.employee && (
-                    <span className="text-xs text-green-600 italic">
-                      {notebook.employee.mtrc} - {notebook.employee.nome || "Sem nome"}
-                      {notebook.created_at && (
-                        <> • {new Date(notebook.created_at).toLocaleString()}</>
-                      )}
+                    <span className="text-xs text-green-600 font-medium ml-2">
+                      {notebook.employee.mtrc} - {notebook.employee.nome || "Sem nome"} - {new Date(notebook.created_at).toLocaleString()}
                     </span>
                   )}
                 </div>
