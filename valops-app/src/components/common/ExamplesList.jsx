@@ -446,7 +446,7 @@ const ExamplesList = () => {
 
     return (
       <>
-        {currentNotebooks.map(notebook => (
+        {Array.isArray(currentNotebooks) ? currentNotebooks.map(notebook => (
           <div key={notebook.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mb-3 hover:shadow-md transition-shadow">
             <div className="flex items-start">
               <div className="flex-shrink-0 mt-1">
@@ -468,7 +468,7 @@ const ExamplesList = () => {
                 </p>
                 
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {notebook.tags && notebook.tags.length > 0 && notebook.tags.map(tag => (
+                  {notebook.tags && Array.isArray(notebook.tags) && notebook.tags.length > 0 && notebook.tags.map(tag => (
                     <span key={tag.id} className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full flex items-center">
                       <Tag size={12} className="mr-1" />
                       {tag.name}
@@ -501,7 +501,12 @@ const ExamplesList = () => {
               </div>
             </div>
           </div>
-        ))}
+        )) : (
+          <div className="text-center p-8">
+            <p className="text-gray-600">Erro ao processar dados dos notebooks.</p>
+            <p className="text-sm text-gray-500 mt-2">Tente novamente mais tarde.</p>
+          </div>
+        )}
 
         {/* Paginação */}
         {notebooks.length > notebooksPerPage && (

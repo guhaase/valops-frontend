@@ -618,7 +618,7 @@ const ArticleList = ({
 
     return (
       <>
-        {currentArticles.map(article => (
+        {Array.isArray(currentArticles) ? currentArticles.map(article => (
           <div key={article.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mb-3 hover:shadow-md transition-shadow">
             <div className="flex items-start">
               <div className="flex-shrink-0 mt-1">
@@ -630,7 +630,7 @@ const ArticleList = ({
                   {/* Mostrar informações do funcionário se estiverem disponíveis */}
                   {article.employee && (
                     <span className="text-xs text-green-600 font-medium ml-2">
-                      {article.employee.mtrc} - {article.employee.nome.toUpperCase() || "Sem nome"} - {new Date(article.created_at).toLocaleString()}
+                      {article.employee.mtrc} - {article.employee.nome?.toUpperCase() || "Sem nome"} - {new Date(article.created_at).toLocaleString()}
                     </span>
                   )}
                 </div>
@@ -662,7 +662,7 @@ const ArticleList = ({
                 )}
                 
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {article.tags && article.tags.length > 0 && article.tags.map(tag => (
+                  {article.tags && Array.isArray(article.tags) && article.tags.length > 0 && article.tags.map(tag => (
                     <span key={tag.id} className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full flex items-center">
                       <Tag size={12} className="mr-1" />
                       <span>{tag.name}</span>
@@ -711,7 +711,12 @@ const ArticleList = ({
               </div>
             </div>
           </div>
-        ))}
+        )) : (
+          <div className="text-center p-8">
+            <p className="text-gray-600">Erro ao processar dados dos artigos.</p>
+            <p className="text-sm text-gray-500 mt-2">Tente novamente mais tarde.</p>
+          </div>
+        )}
 
         {/* Paginação */}
         {articles.length > articlesPerPage && (
