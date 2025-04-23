@@ -151,7 +151,7 @@ const Login = () => {
         
         <div className="mt-4 text-xs text-gray-400 text-center">
           <p>Ambiente: development</p>
-          <p>API: http://localhost:8000</p>
+          <p>API: http://10.2.98.165:8000</p>
         </div>
       </div>
     </div>
