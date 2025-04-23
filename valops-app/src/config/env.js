@@ -6,7 +6,11 @@ const environment = process.env.NODE_ENV || 'development';
 // Define URLs base para os diferentes ambientes
 const baseURLs = {
   development: 'http://10.2.98.165:8000',
+<<<<<<< HEAD
   staging: 'http://staging-api.valops.local',
+=======
+  staging: 'http://10.2.98.165:8000',
+>>>>>>> 6fb942b7f3659fc19f1abaabebba786f05f96df4
   production: 'http://10.2.98.165:8000'  // Apontando diretamente para o backend
 };
 
