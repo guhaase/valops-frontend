@@ -5,7 +5,7 @@ const environment = process.env.NODE_ENV || 'development';
 
 // Define URLs base para os diferentes ambientes
 const baseURLs = {
-  development: 'http://localhost:8000',
+  development: 'http://10.2.98.165:8000',
   staging: 'http://staging-api.valops.local',
   production: 'http://10.2.98.165/api'  // Apontando para o proxy no Nginx
 };

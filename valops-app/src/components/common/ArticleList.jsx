@@ -40,8 +40,8 @@ const ArticleList = ({
   const [showTagSuggestions, setShowTagSuggestions] = useState(false);
   const tagSearchRef = useRef(null);
   
-  // State para filtragem
-  const [filterTags, setFilterTags] = useState(initialFilterTags || []);
+  // State para filtragem - garantir que initialFilterTags seja um array
+  const [filterTags, setFilterTags] = useState(Array.isArray(initialFilterTags) ? initialFilterTags : []);
   const [showFilterSuggestions, setShowFilterSuggestions] = useState(false);
   const [filterTagSearch, setFilterTagSearch] = useState('');
   const filterSearchRef = useRef(null);
@@ -136,11 +136,18 @@ const ArticleList = ({
   const fetchTags = async () => {
     try {
       const data = await apiHelper.tags.getAll();
-      setAllTags(data);
-      log.debug("Tags carregadas:", data.length);
-      return data;
+      // Garantir que data é um array antes de definir no estado
+      if (Array.isArray(data)) {
+        setAllTags(data);
+        log.debug("Tags carregadas:", data.length);
+      } else {
+        log.error("Dados de tags recebidos não são um array:", data);
+        setAllTags([]);
+      }
+      return Array.isArray(data) ? data : [];
     } catch (error) {
       log.error("Erro ao buscar tags:", error);
+      setAllTags([]);
       return [];
     }
   };
@@ -266,9 +273,11 @@ const ArticleList = ({
   // Função para filtrar tags para upload
   const getFilteredTags = () => {
     if (!searchTag.trim()) return [];
+    if (!Array.isArray(allTags)) return [];
+    if (!Array.isArray(selectedTags)) return [];
     
     return allTags.filter(tag => 
-      tag.name.toLowerCase().includes(searchTag.toLowerCase()) &&
+      tag.name && tag.name.toLowerCase().includes(searchTag.toLowerCase()) &&
       !selectedTags.some(selectedTag => selectedTag.id === tag.id)
     ).slice(0, 10);
   };
@@ -276,16 +285,20 @@ const ArticleList = ({
   // Função para filtrar tags para o filtro de busca
   const getFilterTagSuggestions = () => {
     if (!filterTagSearch.trim()) return [];
+    if (!Array.isArray(allTags)) return [];
+    if (!Array.isArray(filterTags)) return [];
     
     return allTags.filter(tag => 
-      tag.name.toLowerCase().includes(filterTagSearch.toLowerCase()) &&
+      tag.name && tag.name.toLowerCase().includes(filterTagSearch.toLowerCase()) &&
       !filterTags.some(selectedTag => selectedTag.id === tag.id)
     ).slice(0, 10);
   };
 
   // Função para adicionar tag ao filtro
   const addFilterTag = (tag) => {
-    if (!filterTags.some(t => t.id === tag.id)) {
+    if (!Array.isArray(filterTags)) {
+      setFilterTags([tag]);
+    } else if (!filterTags.some(t => t.id === tag.id)) {
       setFilterTags([...filterTags, tag]);
     }
     setFilterTagSearch('');
@@ -294,6 +307,10 @@ const ArticleList = ({
 
   // Função para remover tag do filtro
   const removeFilterTag = (tagId) => {
+    if (!Array.isArray(filterTags)) {
+      setFilterTags([]);
+      return;
+    }
     setFilterTags(filterTags.filter(tag => tag.id !== tagId));
   };
 
@@ -304,6 +321,13 @@ const ArticleList = ({
 
   // Função para adicionar tag ao upload
   const addTag = (tag) => {
+    if (!Array.isArray(selectedTags)) {
+      setSelectedTags([tag]);
+      setSearchTag('');
+      setShowTagSuggestions(false);
+      return;
+    }
+    
     if (selectedTags.length >= 4) {
       alert('Máximo de 4 tags permitidas');
       return;
@@ -319,6 +343,10 @@ const ArticleList = ({
 
   // Função para remover tag do upload
   const removeTag = (tagId) => {
+    if (!Array.isArray(selectedTags)) {
+      setSelectedTags([]);
+      return;
+    }
     setSelectedTags(selectedTags.filter(tag => tag.id !== tagId));
   };
 
@@ -331,6 +359,12 @@ const ArticleList = ({
     const tagNamesArray = Array.isArray(tagNames) ? tagNames : [tagNames];
     
     if (tagNamesArray.length === 0) return [];
+    
+    // Verificar se allTags é um array antes de usar filter
+    if (!Array.isArray(allTags)) {
+      console.error("allTags não é um array:", allTags);
+      return [];
+    }
     
     // Primeiro, verificar quais tags já existem
     const existingTags = allTags.filter(tag => 

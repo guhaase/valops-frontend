@@ -1,0 +1,26 @@
+# NOVO RUNNER
+before_script:
+  - echo "$CI_BUILD_TOKEN" | docker login -u gitlab-ci-token --password-stdin "$CI_REGISTRY"
+
+stages:
+  - build
+  - deploy
+
+build-prod:
+  stage: build
+  script:
+    - docker build -t "$CI_REGISTRY_IMAGE" .
+    - docker push "$CI_REGISTRY_IMAGE"
+  only:
+    - master
+  tags:
+    - cloud1-cicd
+
+deploy-prod:
+  stage: deploy
+  script:
+    - docker stack deploy -c docker-compose.yml --with-registry-auth dicoi-valops-front
+  only:
+    - master
+  tags:
+    - cloud1-cicd
