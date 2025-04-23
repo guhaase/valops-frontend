@@ -1,13 +1,29 @@
-version: '3.8'
+version: '3.4'
 
 services:
   # Serviço do frontend
   frontend:
+    image: registry.cloud1.intranet.bb.com.br/dicoi/uor283930/valops-front
+    networks:
+      - edge
+    deploy:
+      labels:
+        - 'traefik.enable=true'
+        - 'traefik.http.routers.dicoi-valops-back.rule=Host(`app.dicoi.intranet.bb.com.br`) && PathPrefix(`/valops-front`)'
+        - 'traefik.http.routers.dicoi-valops-back.entrypoints=websecure'
+        - 'traefik.http.routers.dicoi-valops-back.tls=true'
+        - 'traefik.http.routers.dicoi-valops-back.middlewares=c1-traefik2-intranet, c1-traefik2-gzip'
+        - 'traefik.http.services.dicoi-valops-back.loadbalancer.server.port=5010'
+      placement:
+        constraints:
+          - node.labels.deploy == true
+        preferences:
+          - spread: node.labels.deploy
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        - VITE_API_BASE_URL=${API_BASE_URL:-http://localhost:8000}
+        - VITE_API_BASE_URL=${API_BASE_URL:-http://10.2.98.165:8000}
     container_name: valops_frontend
     restart: unless-stopped
     ports:
@@ -31,11 +47,11 @@ services:
       - ./proxy/nginx.conf:/etc/nginx/conf.d/default.conf
     networks:
       - default
-      - backend-network
+      - frontend-network
 
 networks:
   default:
     driver: bridge
   backend-network:
     external: true
-    name: valops-backend_default
+    name: valops-frontend_default

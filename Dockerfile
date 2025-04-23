@@ -10,7 +10,7 @@ RUN npm ci
 COPY valops-app/ ./
 
 # Definir variáveis de ambiente
-ARG VITE_API_BASE_URL=http://localhost:8000
+ARG VITE_API_BASE_URL=http://10.2.98.165:8000
 ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
 
 # Construir a aplicação
