@@ -198,7 +198,7 @@ const login = async (mtrc) => {
     log.debug('Tentando login com matrícula:', mtrc);
     
     // Usar URL direta em vez de depender da configuração de endpoint
-    const loginUrl = 'http://localhost:8000/api/login';
+    const loginUrl = 'http://10.2.98.165:8000/api/login';
     log.debug('URL de login direto:', loginUrl);
     
     const response = await axios.post(loginUrl, { mtrc });
