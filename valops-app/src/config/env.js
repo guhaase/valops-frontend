@@ -1,7 +1,7 @@
 // Variáveis de ambiente para o frontend
 
 // Determina o ambiente atual (development, staging, production)
-const environment = import.meta.env.MODE || 'development';
+const environment = process.env.NODE_ENV || 'development';
 
 // Define URLs base para os diferentes ambientes
 const baseURLs = {
@@ -11,7 +11,7 @@ const baseURLs = {
 };
 
 // API URL base para o ambiente atual
-const apiBaseURL = import.meta.env.VITE_API_BASE_URL || baseURLs[environment] || baseURLs.development;
+const apiBaseURL = process.env.REACT_APP_API_BASE_URL || baseURLs[environment] || baseURLs.development;
 
 // Configurações de timeout para requisições (em ms)
 const apiTimeouts = {

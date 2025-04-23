@@ -4,7 +4,7 @@ import env from './env';
 const config = {
   // API e endpoints
   api: {
-    baseUrl: env.API_BASE_URL,
+    baseUrl: env.apiBaseURL,
     timeout: 30000, // 30 segundos
     endpoints: {
       articles: '/articles',
