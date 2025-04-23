@@ -4,7 +4,7 @@ import config, { log } from '../config';
 
 // Criar a instância do axios com a URL base
 const apiService = axios.create({
-  baseURL: '/api', // Usando o proxy configurado em package.json
+  baseURL: 'http://localhost:8000', // Conectando diretamente ao backend
   timeout: config.api.timeout || 30000,
   headers: {
     'Content-Type': 'application/json',
@@ -197,8 +197,8 @@ const login = async (mtrc) => {
   try {
     log.debug('Tentando login com matrícula:', mtrc);
     
-    // Usar URL direta em vez de depender da configuração de endpoint
-    const loginUrl = 'http://10.2.98.165:8000/api/login';
+    // Usar URL direta para o endpoint de login
+    const loginUrl = 'http://localhost:8000/login';
     log.debug('URL de login direto:', loginUrl);
     
     const response = await axios.post(loginUrl, { mtrc });

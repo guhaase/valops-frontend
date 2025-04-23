@@ -27,7 +27,7 @@ const login = async (mtrc) => {
     
     // Constrói URL da API com fallbacks seguros
     // Usar URL direta para garantir que o endpoint correto seja acessado
-    const loginUrl = 'http://10.2.98.165:8000/api/login';
+    const loginUrl = 'http://localhost:8000/api/login';
     
     log.debug('URL de login:', loginUrl);
     
@@ -49,7 +49,7 @@ const login = async (mtrc) => {
         log.debug('Role não encontrada na resposta, consultando endpoint específico...');
         const roleUrl = config?.api?.baseUrl 
           ? `${config.api.baseUrl}/api/login/user-role?matricula=${response.data.mtrc}`
-          : `http://10.2.98.165:8000/api/login/user-role?matricula=${response.data.mtrc}`;
+          : `http://localhost:8000/api/login/user-role?matricula=${response.data.mtrc}`;
           
         // Adicionar headers necessários para autenticação
         const headers = {

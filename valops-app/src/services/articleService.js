@@ -50,7 +50,8 @@ const articleService = {
         config.headers['X-Employee-MTRC'] = matricula;
       }
       
-      const response = await axios.post('/api/articles', formData, config);
+      // Use the complete URL with the proper port
+      const response = await axios.post('http://localhost:8000/articles', formData, config);
       
       // Mostrar notificação de sucesso
       const date = new Date();
