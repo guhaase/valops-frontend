@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import config, { log } from '../../config';
 import apiHelper from '../../services/apiService';
+import { directLogin } from '../../services/login-helper';
 
 const Login = () => {
   const [mtrc, setMtrc] = useState('');
@@ -59,14 +60,21 @@ const Login = () => {
     try {
       log.debug('Tentando login com matrícula:', mtrc);
       
-      // Usar o serviço de autenticação para fazer login
-      const userData = await apiHelper.auth.login(mtrc);
-      log.debug('Resposta do login:', userData);
+      // Usar nossa função de login direto para evitar problemas com CORS
+      const result = await directLogin(mtrc);
       
-      // Redirecionar para a página inicial
-      navigate(from, { replace: true });
+      if (result.success) {
+        log.debug('Resposta do login direto:', result.data);
+        
+        // Redirecionar para a página inicial
+        navigate(from, { replace: true });
+      } else {
+        // Mostrar mensagem de erro
+        setError(result.error || 'Falha na autenticação');
+        log.error('Erro no login direto:', result.details);
+      }
     } catch (error) {
-      log.error('Erro no login:', error);
+      log.error('Erro grave no login:', error);
       
       let errorMessage = 'Matrícula inválida ou não cadastrada';
       if (error.response && error.response.data) {
@@ -150,8 +158,8 @@ const Login = () => {
         </div>
         
         <div className="mt-4 text-xs text-gray-400 text-center">
-          <p>Ambiente: development</p>
-          <p>API: http://localhost:8000</p>
+          <p>Ambiente: {config.app.environment}</p>
+          <p>API: {config.api.baseUrl}</p>
         </div>
       </div>
     </div>
