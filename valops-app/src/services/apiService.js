@@ -113,12 +113,16 @@ const usuarioService = async () => {
         "https://app.dicoi.intranet.bb.com.br/portal-express/api/usuarios/bbssotoken",
         { withCredentials: true }
       );
+
       
       log.debug('Obtido BBSSOToken para autenticação');
       
       // Consultar o usuário com base no token obtido
       const response = await apiService.get(`/api/usuarios/usuario/${bbssotoken}`);
       
+      console.log("token", response);
+
+
       // Verificar se o usuário existe na base funci e qual seu papel em valops_main.admin_users
       const userRole = await apiService.get(`/admins/check-user-role?bbssotoken=${bbssotoken}`);
       
