@@ -324,15 +324,21 @@ const ArticleList = ({
 
   // Função para encontrar ou criar tags a partir de nomes
   const findOrCreateTagsFromNames = async (tagNames) => {
-    if (!tagNames || tagNames.length === 0) return [];
+    // Verificar se tagNames existe e garantir que seja um array
+    if (!tagNames) return [];
+    
+    // Converter para array se não for um
+    const tagNamesArray = Array.isArray(tagNames) ? tagNames : [tagNames];
+    
+    if (tagNamesArray.length === 0) return [];
     
     // Primeiro, verificar quais tags já existem
     const existingTags = allTags.filter(tag => 
-      tagNames.some(name => name.toLowerCase() === tag.name.toLowerCase())
+      tagNamesArray.some(name => name.toLowerCase() === tag.name.toLowerCase())
     );
     
     // Para as tags que não existem, criar temporariamente
-    const newTagNames = tagNames.filter(name => 
+    const newTagNames = tagNamesArray.filter(name => 
       !existingTags.some(tag => tag.name.toLowerCase() === name.toLowerCase())
     );
     
@@ -423,14 +429,34 @@ const ArticleList = ({
       setFormData(extractedData);
       
       // Se houver keywords/tags, processar e adicionar
-      if (parsedResult.keywords && parsedResult.keywords.length > 0) {
-        // Limitar a 4 tags
-        const limitedKeywords = Array.isArray(parsedResult.keywords) 
-          ? parsedResult.keywords.slice(0, 4) 
-          : parsedResult.keywords.split(',').slice(0, 4);
-          
-        const processedTags = await findOrCreateTagsFromNames(limitedKeywords);
-        setSelectedTags(processedTags);
+      if (parsedResult.keywords) {
+        // Garantir que temos um array de keywords
+        let keywordsArray = [];
+        
+        if (Array.isArray(parsedResult.keywords)) {
+          // Se já for um array, usar diretamente
+          keywordsArray = parsedResult.keywords;
+        } else if (typeof parsedResult.keywords === 'string') {
+          // Se for string, dividir por vírgulas
+          keywordsArray = parsedResult.keywords.split(',').map(k => k.trim());
+        } else {
+          // Para outros casos, tentar converter para string e depois para array
+          try {
+            const keywordStr = String(parsedResult.keywords);
+            keywordsArray = keywordStr.split(',').map(k => k.trim());
+          } catch (e) {
+            log.error("Erro ao processar keywords:", e);
+            keywordsArray = [];
+          }
+        }
+        
+        // Remover valores vazios e limitar a 4 tags
+        keywordsArray = keywordsArray.filter(k => k && k.trim().length > 0).slice(0, 4);
+        
+        if (keywordsArray.length > 0) {
+          const processedTags = await findOrCreateTagsFromNames(keywordsArray);
+          setSelectedTags(processedTags);
+        }
       }
       
       setPdfAnalyzed(true);
