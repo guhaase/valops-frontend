@@ -57,7 +57,7 @@ const ExamplesList = () => {
       };
       
       // Adicionar tags para filtrar, se houver
-      if (filterTags.length > 0) {
+      if (Array.isArray(filterTags) && filterTags.length > 0) {
         params.tag = filterTags[0].name;
       }
       
@@ -430,7 +430,7 @@ const ExamplesList = () => {
         <div className="text-center p-8">
           <p className="text-gray-600">Nenhum notebook de exemplo encontrado.</p>
           
-          {filterTags.length > 0 && (
+          {Array.isArray(filterTags) && filterTags.length > 0 && (
             <p className="text-gray-500 mt-2">
               Tente remover alguns filtros ou selecionar tags diferentes.
             </p>
@@ -446,7 +446,7 @@ const ExamplesList = () => {
 
     return (
       <>
-        {Array.isArray(currentNotebooks) ? currentNotebooks.map(notebook => (
+        {Array.isArray(currentNotebooks) && currentNotebooks.map(notebook => (
           <div key={notebook.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mb-3 hover:shadow-md transition-shadow">
             <div className="flex items-start">
               <div className="flex-shrink-0 mt-1">
@@ -501,9 +501,11 @@ const ExamplesList = () => {
               </div>
             </div>
           </div>
-        )) : (
+        ))}
+        
+        {(!Array.isArray(currentNotebooks) || currentNotebooks.length === 0) && (
           <div className="text-center p-8">
-            <p className="text-gray-600">Erro ao processar dados dos notebooks.</p>
+            <p className="text-gray-600">Nenhum notebook encontrado ou erro ao processar dados.</p>
             <p className="text-sm text-gray-500 mt-2">Tente novamente mais tarde.</p>
           </div>
         )}
@@ -602,7 +604,7 @@ const ExamplesList = () => {
           <Filter className="w-5 h-5 text-blue-600 mr-2" />
           <h4 className="font-medium text-gray-700">Filtrar por Tags</h4>
           
-          {filterTags.length > 0 && (
+          {Array.isArray(filterTags) && filterTags.length > 0 && (
             <button 
               onClick={clearFilters}
               className="ml-auto text-xs text-gray-500 hover:text-gray-700"
@@ -614,7 +616,7 @@ const ExamplesList = () => {
         
         {/* Tags selecionadas para filtro */}
         <div className="flex flex-wrap gap-2 mb-3">
-          {filterTags.map(tag => (
+          {Array.isArray(filterTags) && filterTags.map(tag => (
             <div key={tag.id} className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm flex items-center">
               <Tag size={14} className="mr-1" />
               <span>{tag.name}</span>
@@ -738,7 +740,7 @@ const ExamplesList = () => {
                   onChange={handleInputChange}
                 >
                   <option value="">Selecione uma categoria</option>
-                  {categories.map(cat => (
+                  {Array.isArray(categories) && categories.map(cat => (
                     <option key={cat.id} value={cat.id}>
                       {cat.name}
                     </option>
@@ -755,7 +757,7 @@ const ExamplesList = () => {
                   disabled={!formData.category_id}
                 >
                   <option value="">Selecione uma subcategoria</option>
-                  {getFilteredSubcategories().map(sub => (
+                  {Array.isArray(getFilteredSubcategories()) && getFilteredSubcategories().map(sub => (
                     <option key={sub.id} value={sub.id}>
                       {sub.name}
                     </option>
@@ -769,7 +771,7 @@ const ExamplesList = () => {
                   Tags (máximo 4)
                 </label>
                 <div className="flex flex-wrap gap-2 mb-2">
-                  {selectedTags.map(tag => (
+                  {Array.isArray(selectedTags) && selectedTags.map(tag => (
                     <div key={tag.id} className="bg-blue-50 text-blue-700 px-2 py-1 rounded-full text-sm flex items-center">
                       <span>{tag.name}</span>
                       <button 
