@@ -69,7 +69,7 @@ const Header = () => {
           
           // Construir URL para endpoint de role usando a URL base da API
           const baseUrl = config.api.baseUrl;
-          const roleUrl = `${baseUrl}/api/login/user-role?matricula=${mtrc}`;
+          const roleUrl = `http://localhost:8000/login/user-role?matricula=${mtrc}`;
           
           console.log('[Header] Buscando role do usuário:', roleUrl);
           // Adicionar headers necessários para autenticação

@@ -23,7 +23,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        - VITE_API_BASE_URL=${API_BASE_URL:-http://10.2.98.165:8000}
+        - VITE_API_BASE_URL=${API_BASE_URL:-http://localhost:8000}
     container_name: valops_frontend
     restart: unless-stopped
     ports:
