@@ -13,7 +13,7 @@ RUN npm ci --silent
 COPY . .
 
 # Configuração das variáveis de ambiente para a aplicação
-ARG VITE_API_URL=http://localhost:8000
+ARG VITE_API_URL=http://10.2.98.165:8000
 ENV VITE_API_URL=${VITE_API_URL}
 
 # Build da aplicação para produção

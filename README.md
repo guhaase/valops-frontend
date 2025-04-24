@@ -31,7 +31,7 @@ cd valops-app
 npm run dev
 ```
 
-O aplicativo estará disponível em `http://localhost:5173`
+O aplicativo estará disponível em `http://10.2.98.165:5173`
 
 ## Implantação com Docker
 
@@ -56,7 +56,7 @@ Isso irá:
 - Configurar o reverse proxy para o backend
 - Iniciar todos os serviços necessários
 
-O aplicativo estará disponível em `http://localhost:80`
+O aplicativo estará disponível em `http://10.2.98.165:80`
 
 ### Configuração de CI/CD
 

@@ -10,7 +10,7 @@ const config = require('../config');
 
 // Configuração da pool de conexões
 const pool = mysql.createPool({
-  host: config.db.host || 'localhost',
+  host: config.db.host || '10.2.98.165',
   user: config.db.user || 'valops',
   password: config.db.password || 'valops_password',
   database: config.db.database || 'valops_db',

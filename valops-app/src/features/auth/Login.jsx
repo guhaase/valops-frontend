@@ -131,7 +131,7 @@ const Login = () => {
               type="text"
               id="mtrc"
               value={mtrc}
-              onChange={(e) => setMtrc(e.target.value)}
+              onChange={(e) => setMtrc(e.target.value.toUpperCase())}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Digite sua matrícula"
               disabled={loading}
@@ -158,13 +158,8 @@ const Login = () => {
         </div>
         
         <div className="mt-4 text-xs text-gray-400 text-center">
-<<<<<<< HEAD
-          <p>Ambiente: development</p>
-          <p>API: http://10.2.98.165:8000</p>
-=======
           <p>Ambiente: {config.app.environment}</p>
           <p>API: {config.api.baseUrl}</p>
->>>>>>> 6fb942b7f3659fc19f1abaabebba786f05f96df4
         </div>
       </div>
     </div>

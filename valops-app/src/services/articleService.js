@@ -51,7 +51,7 @@ const articleService = {
       }
       
       // Use the complete URL with the proper port
-      const response = await axios.post('http://localhost:8000/articles', formData, config);
+      const response = await axios.post('http://10.2.98.165:8000/articles', formData, config);
       
       // Mostrar notificação de sucesso
       const date = new Date();
