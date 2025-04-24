@@ -21,6 +21,6 @@ deploy-prod:
   script:
     - docker stack deploy -c docker-compose.yml --with-registry-auth dicoi-valops-front
   only:
-    - master
+    - main
   tags:
     - cloud1-cicd
