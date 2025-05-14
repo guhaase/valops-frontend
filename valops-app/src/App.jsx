@@ -233,7 +233,7 @@ function App() {
             <Route path="/equipes" element={
               <ManagerRoute>
                 <PageContainer>
-                  <div className="p-4">
+                  <div className="p-2 md:p-4">
                     <h1 className="text-2xl font-bold mb-4 text-blue-800">Gestão de Equipes</h1>
                     {/* Adicionando key com data para forçar remontagem do componente */}
                     <EquipesTab key={`equipes-${Date.now()}`} />

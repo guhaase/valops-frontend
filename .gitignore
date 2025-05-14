@@ -71,3 +71,4 @@ out/
 # Misc
 stats.html
 nginx/nginx.conf.backup
+**/.claude/settings.local.json

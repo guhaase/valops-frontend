@@ -1,6 +1,9 @@
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
 module.exports = function(app) {
+  // Get API URL from environment variables or use default
+  const API_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
+
   // Handle CORS preflight OPTIONS requests directly
   app.use('/api', (req, res, next) => {
     if (req.method === 'OPTIONS') {
@@ -18,7 +21,7 @@ module.exports = function(app) {
   app.use(
     '/api',
     createProxyMiddleware({
-      target: 'http://10.2.98.165:8000',
+      target: API_URL,
       changeOrigin: true,
       // Removida a linha pathRewrite para preservar o caminho '/api' na solicitação
       onProxyRes: (proxyRes, req, res) => {

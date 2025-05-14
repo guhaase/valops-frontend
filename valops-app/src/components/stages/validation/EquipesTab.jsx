@@ -2,104 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, X, Search, Plus, User, Users, Edit, Save, Trash2, XCircle, Check, UserPlus, History } from 'lucide-react';
 import equipeService from '../../../services/equipeService';
 
-// Dados iniciais das equipes extraídos da lista fornecida
-const initialTeamsData = [
-  {
-    id: "283931",
-    sigla: "GEARC",
-    nome: "DICOI/GER COMPLIANCE EM CONTABILIDADE, RI E ASG",
-    gerente: {
-      matricula: "F4957230",
-      nome: "JOAO PAULO VIEIRA COSTA",
-      cargo: "GER SOLUCOES UE"
-    },
-    funcionarios: [
-      { matricula: "F0316098", nome: "ALBERTO MAGNO ROSA", cargo: "ASSESSOR I UE" },
-      { matricula: "F2272279", nome: "DANTE COSTA PIMENTEL", cargo: "ASSESSOR II UE" },
-      { matricula: "F2972869", nome: "ERISVALDO COSTA DE SOUZA", cargo: "ASSESSOR II UE" },
-      { matricula: "F6002148", nome: "JULIANA CHAGAS TEIXEIRA ESTEVES DE SOUZA", cargo: "ASSESSOR I UE" },
-      { matricula: "F6323597", nome: "LUCIANA BAPTISTA FLEURY", cargo: "ASSESSOR I UE" },
-      { matricula: "F6861571", nome: "MARIA MARGARETH MATOS RIBEIRO", cargo: "ASSESSOR III UE" },
-      { matricula: "F7029135", nome: "MAURICIO ALMEIDA PINTO", cargo: "ASSESSOR III UE" }
-    ]
-  },
-  {
-    id: "283929",
-    sigla: "GELAM",
-    nome: "DICOI/GER COMPL MOD LIQ ATUARIAL MERCADO E IRRBB",
-    gerente: {
-      matricula: "F6885039",
-      nome: "MARINNA DE SOUZA CARVALHO",
-      cargo: "GER SOLUCOES UE"
-    },
-    funcionarios: [
-      { matricula: "F0743361", nome: "ANDREA REJANE DA SILVA GOMES", cargo: "ASSESSOR II UE" },
-      { matricula: "F3163362", nome: "FABIO DE MELLO MATOS", cargo: "ASSESSOR III UE" },
-      { matricula: "F6320924", nome: "LUCAS ANDRADE DOS REIS", cargo: "ASSESSOR II UE" },
-      { matricula: "F8565239", nome: "RENATO QUEIROZ RODRIGUES", cargo: "ASSESSOR I UE" },
-      { matricula: "F9300968", nome: "TERCIO DE MATOS BRAZ", cargo: "ESPECIALISTA III UE" }
-    ]
-  },
-  {
-    id: "283928",
-    sigla: "GECEI",
-    nome: "DICOI/GER COMPL MOD RISCO CRED, ESTRESSE E ICAAP",
-    gerente: {
-      matricula: "F9342532", 
-      nome: "GERENTE GECEI", 
-      cargo: "GER SOLUCOES UE"
-    },
-    funcionarios: [
-      { matricula: "F1692892", nome: "BRUNO FLORENCIO ALVES", cargo: "ASSESSOR I UE" },
-      { matricula: "F2308888", nome: "DARLAN COELHO DA FONSECA JUNIOR", cargo: "ASSESSOR II UE" },
-      { matricula: "F2731767", nome: "EDUARDO FISCHER", cargo: "ASSESSOR III UE" },
-      { matricula: "F3190256", nome: "FELIPE MATOS HASSEGAWA", cargo: "ESPECIALISTA III UE" },
-      { matricula: "F4389568", nome: "INGRID MENDES DIAS", cargo: "ASSESSOR I UE" },
-      { matricula: "F8028762", nome: "PATRICIA OLIVEIRA SILVA LIMA", cargo: "ASSESSOR I UE" },
-      { matricula: "F8801218", nome: "RUBEM NERE COUTINHO COELHO", cargo: "ASSESSOR II UE" }
-    ]
-  },
-  {
-    id: "283920",
-    sigla: "GECOC",
-    nome: "DICOI/GER COMPL MOD RISCO CRED ORCAM E GES CAPITAL",
-    gerente: {
-      matricula: "F8629061",
-      nome: "ROBERTA CRISTINA FORMIGA DE CASTRO",
-      cargo: "GER SOLUCOES UE"
-    },
-    funcionarios: [
-      { matricula: "F2258011", nome: "DANIEL RESENDE GONCALVES", cargo: "ASSESSOR II UE" },
-      { matricula: "F2747690", nome: "EDUARDO RAMOS FERREIRA", cargo: "ASSESSOR III UE" },
-      { matricula: "F3807003", nome: "GLAUCO RAMOS DE LIMA", cargo: "ASSESSOR I UE" },
-      { matricula: "F4621942", nome: "JANE MARIA DA SILVA", cargo: "ASSESSOR II UE" },
-      { matricula: "F7023257", nome: "MATHEUS ROVERE", cargo: "ASSESSOR I UE" },
-      { matricula: "F8226739", nome: "PEDRO CASTRO NIEMEYER", cargo: "ASSESSOR I UE" }
-      // Removido o gerente da lista de funcionários para evitar duplicação
-    ]
-  },
-  {
-    id: "283930",
-    sigla: "GEVAO",
-    nome: "DICOI/GER COMPL GOV INT ANALITICA IA RO VALID MOD",
-    gerente: {
-      matricula: "F2741489",
-      nome: "EDUARDO MEDEIROS RUBIK",
-      cargo: "GER SOLUCOES UE"
-    },
-    funcionarios: [
-      { matricula: "F3190245", nome: "FELIPE MEDEIROS GOMES", cargo: "ASSESSOR III UE" },
-      { matricula: "F3876812", nome: "GUSTAVO COELHO HAASE", cargo: "ASSESSOR I UE" },
-      { matricula: "F7336364", nome: "NATALIA FRANCOZO", cargo: "ASSESSOR III UE" },
-      { matricula: "F8115904", nome: "PAULO HENRIQUE DOURADO DA SILVA", cargo: "ESPECIALISTA III UE" },
-      { matricula: "F9174636", nome: "SIMONE LIMEIRA PIMENTEL BANDEIRA DE MELLO", cargo: "ASSESSOR II UE" },
-      { matricula: "F9476637", nome: "VERONICA LELIS BITTENCOURT", cargo: "ASSESSOR I UE" }
-    ]
-  }
-];
+// Config para dados de fallback em caso de erro na API
+// Será usado somente para desenvolvimento e/ou quando a API falhar
+const FALLBACK_MODE = false; // Defina como false para desativar os dados de fallback em produção
+
+// Dados de fallback (apenas para desenvolvimento)
+const fallbackTeamsData = [];
 
 const EquipesTab = () => {
-  const [teams, setTeams] = useState(initialTeamsData);
+  const [teams, setTeams] = useState([]);
   const [expandedTeams, setExpandedTeams] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
   const [editingTeamId, setEditingTeamId] = useState(null);
@@ -171,113 +82,142 @@ const EquipesTab = () => {
     }
   };
 
-  // Tenta buscar equipes a partir da API (versão atualizada com novos endpoints)
+  // Busca equipes a partir da API
   const fetchEquipesFromAPI = async () => {
     try {
       setLoading(true);
-      console.log("Buscando equipes simples da API...");
+      console.log("Buscando equipes da API...");
       
-      // Já que o endpoint está com erro 500, vamos usar os dados iniciais diretamente
-      const equipesSimples = initialTeamsData.map(team => ({
-        sgl_dvs: team.sigla,
-        dsc_sgl_dvs: team.nome,
-        uor_dvs: team.id,
-        chv_rsp_dvs: team.gerente.nome
-      }));
+      // Tentar o endpoint que retorna equipes com funcionários (já deduplicado pelo serviço)
+      try {
+        console.log("Tentando usar o endpoint de funcionários por equipes...");
+        const equipesComFuncionarios = await equipeService.getFuncionariosPorEquipes();
+        
+        if (equipesComFuncionarios && equipesComFuncionarios.length > 0) {
+          console.log(`Obtidas ${equipesComFuncionarios.length} equipes com funcionários do endpoint`);
+          
+          // Processar equipes para garantir formato correto
+          const processedTeams = equipesComFuncionarios.map(equipe => {
+            // Garantir que temos um ID válido
+            const id = (equipe.id || equipe.uor_dvs || Math.floor(Math.random() * 1000000)).toString();
+            const sigla = equipe.sigla || equipe.sgl_dvs || "";
+            
+            // Criar objeto de equipe com dados formatados
+            return {
+              id: id,
+              sigla: sigla,
+              nome: equipe.nome || equipe.dsc_sgl_dvs || "",
+              gerente: {
+                matricula: equipe.gerente?.matricula || equipe.mtrc_gerente || "",
+                nome: equipe.gerente?.nome || equipe.chv_rsp_dvs || "Gerente não informado",
+                cargo: equipe.gerente?.cargo || equipe.cargo_gerente || "GER SOLUCOES UE"
+              },
+              funcionarios: Array.isArray(equipe.funcionarios) ? equipe.funcionarios.map(f => ({
+                matricula: f.matricula || f.mtrc,
+                nome: f.nome || "Nome não informado",
+                cargo: f.cargo || f.tx_cmss_fun || "Cargo não informado"
+              })) : []
+            };
+          });
+          
+          console.log(`Processadas ${processedTeams.length} equipes com funcionários`);
+          setTeams(processedTeams);
+          return;
+        }
+      } catch (error) {
+        console.warn("Erro ao usar o endpoint de funcionários por equipes:", error);
+        console.log("Fallback para o método antigo...");
+      }
       
-      console.log("Usando dados simulados para equipesSimples:", equipesSimples);
+      // Método antigo: chamar o endpoint de equipes simples e depois buscar funcionários
+      const equipesSimples = await equipeService.getEquipesSimples();
       
       if (equipesSimples && equipesSimples.length > 0) {
-        // Array para armazenar as promessas de busca de funcionários
+        console.log(`Obtidas ${equipesSimples.length} equipes da API (método antigo)`);
+        
+        // Array para armazenar as equipes processadas
         const processedTeams = [];
         
         for (const equipe of equipesSimples) {
-          // Gerar um ID
+          // Gerar um ID a partir do UOR ou gerar um aleatório
           const id = (equipe.uor_dvs || Math.floor(Math.random() * 1000000)).toString();
           const sigla = equipe.sgl_dvs || "";
           
-          // Para cada sigla de equipe, vamos localizar a equipe correspondente nos dados iniciais
-          const dadosEquipe = initialTeamsData.find(team => team.sigla === sigla) || {
-            funcionarios: [],
-            gerente: { matricula: "", nome: "", cargo: "" }
-          };
-          
-          // Filtrar o gerente da lista de funcionários para evitar duplicação
-          const funcionariosFiltrados = dadosEquipe.funcionarios
-            .filter(func => func.matricula !== dadosEquipe.gerente.matricula);
-          
-          // Construir o objeto de equipe no formato esperado pelo componente
-          processedTeams.push({
-            id: id,
-            sigla: sigla,
-            nome: equipe.dsc_sgl_dvs || "",
-            gerente: dadosEquipe.gerente,
-            funcionarios: funcionariosFiltrados
-          });
-        }
-        
-        // Tentar buscar funcionários de verdade da API para algumas equipes onde o endpoint está funcionando
-        try {
-          for (const team of processedTeams) {
-            if (team.sigla) {
-              try {
-                const funcionarios = await fetchFuncionariosEquipe(team.sigla);
-                if (funcionarios && funcionarios.length > 0) {
-                  console.log(`Funcionários reais encontrados para equipe ${team.sigla}:`, funcionarios);
-                  // Converter para o formato esperado pela interface e remover gerente da lista
-                  const funcionariosApi = funcionarios
-                    .filter(f => f.mtrc !== team.gerente.matricula)  // Remover gerente da lista de funcionários
-                    .map(f => {
-                      // Preservar todos os dados originais para diagnóstico
-                      return {
-                        ...f,  // Manter todos os campos originais
-                        matricula: f.mtrc,
-                        nome: f.nome || "Nome não informado",
-                        cargo: f.cargo || f.tx_cmss_fun || "", // Não usar fallback para diagnóstico
-                        dadosOriginais: JSON.stringify(f) // Para diagnóstico
-                      };
-                    });
-                  
-                  // Vamos tentar encontrar os cargos nos dados iniciais
-                  const funcionariosCompletos = funcionariosApi.map(funcionarioApi => {
-                    // Buscar nos dados iniciais um funcionário com a mesma matrícula
-                    const funcionarioInicial = initialTeamsData
-                      .flatMap(team => team.funcionarios)
-                      .find(f => f.matricula === funcionarioApi.mtrc);
-                    
-                    // Se encontrou, usar o cargo dos dados iniciais
-                    if (funcionarioInicial) {
-                      console.log(`Encontrado cargo para ${funcionarioApi.mtrc} nos dados iniciais: ${funcionarioInicial.cargo}`);
-                      return {
-                        ...funcionarioApi,
-                        cargo: funcionarioInicial.cargo || funcionarioApi.cargo
-                      };
-                    }
-                    
-                    return funcionarioApi;
-                  });
-                  
-                  team.funcionarios = funcionariosCompletos;
-                }
-              } catch (error) {
-                console.error(`Erro ao buscar funcionários da equipe ${team.sigla}:`, error);
+          try {
+            // Buscar informações do gerente (vamos considerar que o chv_rsp_dvs tem o nome do gerente)
+            const gerenteNome = equipe.chv_rsp_dvs || "Gerente não informado";
+            
+            // Criar objeto de equipe inicial
+            const teamObj = {
+              id: id,
+              sigla: sigla,
+              nome: equipe.dsc_sgl_dvs || "",
+              gerente: {
+                matricula: equipe.mtrc_gerente || "", 
+                nome: gerenteNome,
+                cargo: equipe.cargo_gerente || "GER SOLUCOES UE"
+              },
+              funcionarios: []
+            };
+            
+            // Buscar funcionários da equipe
+            try {
+              console.log(`Buscando funcionários da equipe ${sigla}...`);
+              const funcionarios = await equipeService.getFuncionariosEquipe(sigla);
+              
+              if (funcionarios && funcionarios.length > 0) {
+                console.log(`Encontrados ${funcionarios.length} funcionários para a equipe ${sigla}`);
+                
+                // Converter para o formato esperado pela interface e remover gerente da lista
+                const funcionariosFormatados = funcionarios
+                  .filter(f => f.mtrc !== teamObj.gerente.matricula)  // Remover gerente da lista
+                  .map(f => ({
+                    matricula: f.mtrc,
+                    nome: f.nome || "Nome não informado",
+                    cargo: f.cargo || f.tx_cmss_fun || "Cargo não informado"
+                  }));
+                
+                teamObj.funcionarios = funcionariosFormatados;
               }
+            } catch (error) {
+              console.error(`Erro ao buscar funcionários da equipe ${sigla}:`, error);
             }
+            
+            processedTeams.push(teamObj);
+          } catch (error) {
+            console.error(`Erro ao processar a equipe ${sigla}:`, error);
           }
-        } catch (error) {
-          console.error("Erro ao buscar funcionários das equipes:", error);
         }
         
-        console.log(`Processadas ${processedTeams.length} equipes da API`);
-        setTeams(processedTeams);
-        return;
+        if (processedTeams.length > 0) {
+          console.log(`Processadas ${processedTeams.length} equipes da API (método antigo)`);
+          setTeams(processedTeams);
+          return;
+        }
       }
       
-      console.log("Usando dados iniciais");
-      setTeams(initialTeamsData);
+      // Se chegou aqui, houve um problema ou não há dados
+      console.warn("Não foram encontradas equipes válidas na API");
+      
+      // Usar dados de fallback apenas se estiver no modo de fallback
+      if (FALLBACK_MODE && fallbackTeamsData.length > 0) {
+        console.log("Usando dados de fallback para desenvolvimento");
+        setTeams(fallbackTeamsData);
+      } else {
+        // Em produção ou se não houver dados de fallback, mostrar array vazio
+        setTeams([]);
+      }
     } catch (err) {
       console.error("Erro ao buscar equipes da API:", err);
-      setTeams(initialTeamsData);
+      
+      // Usar dados de fallback apenas se estiver no modo de fallback
+      if (FALLBACK_MODE && fallbackTeamsData.length > 0) {
+        console.log("Usando dados de fallback para desenvolvimento devido a erro");
+        setTeams(fallbackTeamsData);
+      } else {
+        // Em produção ou se não houver dados de fallback, mostrar array vazio
+        setTeams([]);
+      }
     } finally {
       setLoading(false);
     }
@@ -505,40 +445,27 @@ const EquipesTab = () => {
       // Vamos buscar funcionários tanto dos dados iniciais quanto dos recentemente removidos
       let funcionariosDisponiveis = [];
       
-      // 1. Adicionar funcionários dos dados iniciais que não estão presentes na lista atual
-      const teamDataOriginal = initialTeamsData.find(t => t.sigla === editingTeam.sigla);
-      if (teamDataOriginal) {
-        const todasMatriculas = teamDataOriginal.funcionarios.map(f => f.matricula);
-        console.log("Todas as matrículas que deveriam estar na equipe:", todasMatriculas);
+      // 1. Tentar buscar funcionários originais via API
+      try {
+        const funcionariosOriginais = await equipeService.getFuncionariosOriginaisNaoVinculados(editingTeam.sigla);
         
-        // Determinar quais funcionários estão faltando na equipe atual
-        const matriculasFaltantes = todasMatriculas.filter(
-          m => !matriculasAtuais.includes(m)
-        );
-        console.log("Matrículas faltantes:", matriculasFaltantes);
-        
-        // Buscar funcionários dos dados iniciais
-        if (matriculasFaltantes.length > 0) {
-          const funcionariosDadosIniciais = matriculasFaltantes.map(matricula => {
-            // Encontrar o funcionário nos dados iniciais
-            const funcionarioOriginal = teamDataOriginal.funcionarios
-              .find(f => f.matricula === matricula);
-            
-            if (funcionarioOriginal) {
-              return {
-                mtrc: funcionarioOriginal.matricula,
-                nome: funcionarioOriginal.nome,
-                cargo: funcionarioOriginal.cargo,
-                fonte: "ORIGINAL (Dados Iniciais)",
-                ativo: false
-              };
-            }
-            
-            return null;
-          }).filter(Boolean); // Remove nulos
+        if (funcionariosOriginais && funcionariosOriginais.length > 0) {
+          console.log(`Encontrados ${funcionariosOriginais.length} funcionários originais para reinclusão`);
           
-          funcionariosDisponiveis = [...funcionariosDisponiveis, ...funcionariosDadosIniciais];
+          const funcionariosFormatados = funcionariosOriginais.map(f => ({
+            mtrc: f.mtrc,
+            nome: f.nome || "Nome não informado",
+            cargo: f.cargo || f.tx_cmss_fun || "Cargo não informado",
+            fonte: "ORIGINAL (API)",
+            ativo: false
+          }));
+          
+          funcionariosDisponiveis = [...funcionariosDisponiveis, ...funcionariosFormatados];
+        } else {
+          console.log("Nenhum funcionário original encontrado via API");
         }
+      } catch (error) {
+        console.error("Erro ao buscar funcionários originais:", error);
       }
       
       // 2. Adicionar funcionários recentemente removidos na sessão atual
@@ -643,14 +570,30 @@ const EquipesTab = () => {
       setSyncLoading(true);
       setSyncResult(null);
       
-      // Atualiza as equipes simplesmente buscando-as novamente do endpoint simplificado
-      await fetchEquipesFromAPI();
-      
-      // Mensagem de sucesso simplificada
-      setSyncResult({
-        success: true,
-        message: `Equipes DICOI atualizadas com sucesso.`
-      });
+      // Tentar sincronizar equipes via API, se disponível
+      try {
+        // Se tiver implementação para sincronização, use-a
+        const syncResult = await equipeService.sincronizarEquipesDicoi();
+        console.log("Resultado da sincronização:", syncResult);
+        
+        // Se a sincronização for bem-sucedida, atualize os dados
+        await fetchEquipesFromAPI();
+        
+        setSyncResult({
+          success: true,
+          message: `Equipes sincronizadas com sucesso. ${syncResult.updated || 0} equipes atualizadas.`
+        });
+      } catch (syncError) {
+        console.warn("Endpoint de sincronização indisponível, atualizando apenas a visualização:", syncError);
+        
+        // Se não puder sincronizar, apenas recarregar os dados
+        await fetchEquipesFromAPI();
+        
+        setSyncResult({
+          success: true,
+          message: "Dados de equipes atualizados com sucesso."
+        });
+      }
     } catch (error) {
       console.error("Erro ao sincronizar equipes:", error);
       setSyncResult({
@@ -781,7 +724,7 @@ const EquipesTab = () => {
   };
   
   return (
-    <div className="max-w-6xl mx-auto p-4">
+    <div className="max-w-7xl mx-auto p-2 md:p-4">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Gerenciamento de Equipes de Validação de Modelos</h1>
         <p className="text-gray-600">Visualize e gerencie as equipes responsáveis pela validação de modelos.</p>

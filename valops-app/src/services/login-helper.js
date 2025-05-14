@@ -1,5 +1,6 @@
 // /src/services/login-helper.js
 import axios from 'axios';
+import config from '../config';
 
 /**
  * Função para realizar login diretamente no backend
@@ -9,8 +10,8 @@ export const directLogin = async (matricula) => {
   try {
     console.log('Tentando login direto com matrícula:', matricula);
     
-    // Usar URL direta do backend, sem passar por proxy
-    const response = await axios.post('http://10.2.98.165:8000/api/login/', {
+    // Usar URL configurada do backend via environment variables
+    const response = await axios.post(`${config.api.baseUrl}/api/login/`, {
       mtrc: matricula
     }, {
       headers: {
@@ -23,12 +24,19 @@ export const directLogin = async (matricula) => {
     if (response.data && response.data.mtrc) {
       // Armazenar dados do usuário no localStorage
       localStorage.setItem('valops_mtrc', response.data.mtrc);
-      localStorage.setItem('valops_user', JSON.stringify({
+      const userData = {
         mtrc: response.data.mtrc,
         nome: response.data.nome || '',
         uor: response.data.uor || '',
         role: response.data.role || 'user'
-      }));
+      };
+      localStorage.setItem('valops_user', JSON.stringify(userData));
+      
+      // Disparar evento de alteração do estado de autenticação
+      const authEvent = new CustomEvent('auth-state-changed', { 
+        detail: { isLoggedIn: true, userData } 
+      });
+      window.dispatchEvent(authEvent);
       
       // Definir headers para futuras requisições
       axios.defaults.headers.common['X-Employee-MTRC'] = response.data.mtrc;

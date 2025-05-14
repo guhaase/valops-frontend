@@ -3,6 +3,91 @@ import api from './api';
 
 const equipeService = {
   /**
+   * Obtém todas as equipes com os funcionários
+   * @returns {Promise<Array>} Lista de equipes com funcionários
+   */
+  getFuncionariosPorEquipes: async () => {
+    try {
+      // Tenta usar o novo endpoint que já retorna dados agrupados
+      try {
+        console.log('Usando o endpoint de funcionários agrupados por equipe...');
+        
+        // Adicionar um log detalhado para diagnóstico
+        try {
+          const diagnoseResponse = await api.get('/equipes/');
+          console.log('Diagnóstico - Endpoint básico de equipes:', diagnoseResponse.status);
+        } catch (e) {
+          console.warn('Erro no diagnóstico do endpoint básico:', e.message);
+        }
+        
+        // Tenta chamar o endpoint agrupado
+        const response = await api.get('/equipes/funcionarios_agrupados');
+        console.log('Resposta do endpoint agrupado:', response.status);
+        
+        if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+          console.log(`Recebidas ${response.data.length} equipes com funcionários já agrupados`);
+          return response.data;
+        } else {
+          console.warn('Endpoint agrupado retornou uma resposta vazia ou inválida');
+        }
+      } catch (error) {
+        console.warn('Erro ao usar endpoint de funcionários agrupados:', error.message);
+        console.log('Detalhes do erro:', error.response?.status, error.response?.data);
+        console.log('Fallback para o método de agrupamento manual...');
+      }
+      
+      // Fallback: buscar dados e fazer o agrupamento manualmente
+      const response = await api.get('/equipes/funcionarios');
+      
+      // Deduplicate teams and group employees by team
+      const teamsMap = new Map();
+      
+      if (response.data && Array.isArray(response.data)) {
+        // First pass: identify unique teams
+        response.data.forEach(item => {
+          const teamId = item.uor_dvs?.toString();
+          if (teamId && !teamsMap.has(teamId)) {
+            teamsMap.set(teamId, {
+              id: teamId,
+              sigla: item.sgl_dvs || '',
+              nome: item.dsc_sgl_dvs || '',
+              gerente: {
+                matricula: item.mtrc_gerente || '',
+                nome: item.chv_rsp_dvs || 'Gerente não informado',
+                cargo: 'GER SOLUCOES UE'
+              },
+              funcionarios: []
+            });
+          }
+        });
+        
+        // Second pass: add employees to their teams
+        response.data.forEach(item => {
+          const teamId = item.uor_dvs?.toString();
+          if (teamId && teamsMap.has(teamId)) {
+            // Only add if it's an employee (has mtrc) and not already in the list
+            if (item.mtrc && !teamsMap.get(teamId).funcionarios.some(f => f.matricula === item.mtrc)) {
+              teamsMap.get(teamId).funcionarios.push({
+                matricula: item.mtrc,
+                nome: item.nome || 'Nome não informado',
+                cargo: item.tx_cmss_fun || 'Cargo não informado'
+              });
+            }
+          }
+        });
+        
+        console.log(`Processadas ${teamsMap.size} equipes únicas com funcionários`);
+        return Array.from(teamsMap.values());
+      }
+      
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao buscar funcionários por equipes:', error);
+      throw error;
+    }
+  },
+  
+  /**
    * Obtém todas as equipes
    * @returns {Promise<Array>} Lista de equipes
    */

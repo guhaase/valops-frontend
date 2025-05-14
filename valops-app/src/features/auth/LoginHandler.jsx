@@ -36,7 +36,8 @@ const LoginHandler = () => {
         const checkUserRole = async () => {
           try {
             // Tentar obter o papel do usuário do backend
-            const response = await fetch(`http://10.2.98.165:8000/login/user-role?matricula=${mtrc}`);
+            const apiUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
+            const response = await fetch(`${apiUrl}/login/user-role?matricula=${mtrc}`);
             const data = await response.json();
             
             if (data && data.role) {

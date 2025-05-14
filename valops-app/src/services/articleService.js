@@ -1,6 +1,7 @@
 // src/services/articleService.js
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import config from '../config';
 
 /**
  * Serviço para gerenciar operações com artigos
@@ -50,8 +51,8 @@ const articleService = {
         config.headers['X-Employee-MTRC'] = matricula;
       }
       
-      // Use the complete URL with the proper port
-      const response = await axios.post('http://10.2.98.165:8000/articles', formData, config);
+      // Use the complete URL from environment configuration
+      const response = await axios.post(`${config.api.baseUrl}/articles`, formData, config);
       
       // Mostrar notificação de sucesso
       const date = new Date();
