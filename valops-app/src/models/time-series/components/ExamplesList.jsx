@@ -11,7 +11,7 @@ const TimeSeriesExamplesList = () => {
   // Define as tags relacionadas à séries temporais para pré-filtrar
   const timeSeriesTags = [
     // Tags específicas para séries temporais
-    // Podem ser carregadas posteriormente pelo componente genérico
+    // Podem ser carregadas Posteriormente pelo componente genérico
   ];
 
   // Configurações específicas para os exemplos de séries temporais

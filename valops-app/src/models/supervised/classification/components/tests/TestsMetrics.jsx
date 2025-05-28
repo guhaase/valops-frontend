@@ -134,7 +134,7 @@ const TestsMetrics = () => {
       suitable: [
         'Comparação de diferentes modelos independentemente do threshold',
         'Avaliação do poder de discriminação geral',
-        'Quando o threshold de classificação será ajustado posteriormente',
+        'Quando o threshold de classificação será ajustado Posteriormente',
         'Modelos que produzem scores/probabilidades em vez de classificações binárias'
       ],
       unsuitable: [

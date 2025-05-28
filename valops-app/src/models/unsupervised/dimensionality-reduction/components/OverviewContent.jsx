@@ -62,7 +62,7 @@ const OverviewContent = () => {
             </li>
             <li className="flex items-start text-sm">
               <span className="text-blue-500 mr-2 mt-1">•</span>
-              <span>Preservar informações discriminantes para tarefas posteriores</span>
+              <span>Preservar informações discriminantes para tarefas Posteriores</span>
             </li>
             <li className="flex items-start text-sm">
               <span className="text-blue-500 mr-2 mt-1">•</span>

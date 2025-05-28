@@ -402,7 +402,7 @@ const EquipesTab = () => {
         observacoes: `Funcionário ${funcionarioRemovido.nome} removido da equipe ${editingTeam.sigla}`
       };
       
-      // Adicionar à lista de funcionários removidos para salvar posteriormente
+      // Adicionar à lista de funcionários removidos para salvar Posteriormente
       const removedEmployees = editingTeam.removedEmployees || [];
       
       console.log(`Preparando para remover funcionário: ${JSON.stringify(funcionarioParaRemover)}`);

@@ -7,6 +7,23 @@ import authService from './authService';
  */
 const workqueueService = {
   /**
+   * Obtém a lista de itens na fila de trabalho do GAIA.
+   * 
+   * @param {Object} params - Parâmetros de paginação
+   * @param {number} params.skip - Número de registros para pular
+   * @param {number} params.limit - Número máximo de registros para retornar
+   * @returns {Promise<Object>} - Resposta da API com os itens da fila
+   */
+  async getGaiaQueue(params = { skip: 0, limit: 100 }) {
+    try {
+      const response = await api.get('/gaia/fila-gaia', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao obter fila do GAIA:', error);
+      throw error;
+    }
+  },
+  /**
    * Obtém a lista de itens na fila de validação prévia.
    * 
    * @param {Object} params - Parâmetros de paginação
@@ -16,7 +33,7 @@ const workqueueService = {
    */
   async getValidationQueuePrevia(params = { skip: 0, limit: 100 }) {
     try {
-      const response = await api.get('/validation-queue/previa', { params });
+      const response = await api.get('/validation-queue/Prévia', { params });
       return response.data;
     } catch (error) {
       console.error('Erro ao obter fila de validação prévia:', error);
@@ -147,7 +164,7 @@ const workqueueService = {
   },
   
   /**
-   * Obtém a lista de itens na fila de validação posterior (monitoramento).
+   * Obtém a lista de itens na fila de validação Posterior (monitoramento).
    * 
    * @param {Object} params - Parâmetros de paginação
    * @param {number} params.skip - Número de registros para pular
@@ -157,7 +174,7 @@ const workqueueService = {
   async getPostValidationQueue(params = { skip: 0, limit: 100 }) {
     try {
       // Esta API ainda não está implementada no backend
-      // const response = await api.get('/validation-queue/posterior', { params });
+      // const response = await api.get('/validation-queue/Posterior', { params });
       // return response.data;
       
       // Por enquanto, retorna dados simulados
@@ -186,7 +203,7 @@ const workqueueService = {
         criticos: 0
       };
     } catch (error) {
-      console.error('Erro ao obter fila de validação posterior:', error);
+      console.error('Erro ao obter fila de validação Posterior:', error);
       throw error;
     }
   }

@@ -17,7 +17,7 @@ import {
 
 const PipelineTab = () => {
   const [activeSection, setActiveSection] = useState('overview');
-  const [activeSubtab, setActiveSubtab] = useState('previa');
+  const [activeSubtab, setActiveSubtab] = useState('Prévia');
   
   // Função para renderizar a sub-navegação - removida conforme solicitado
   const renderSubNavigation = () => {
@@ -118,7 +118,7 @@ const PipelineTab = () => {
       </div>
       
       {/* Conteúdo das seções */}
-      {activeSection === 'overview' && activeSubtab === 'previa' && (
+      {activeSection === 'overview' && activeSubtab === 'Prévia' && (
         <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm mb-6">
           <h4 className="font-semibold text-gray-800 mb-4">Validação Prévia</h4>
           <p className="text-sm text-gray-600 mb-4">
@@ -186,11 +186,11 @@ const PipelineTab = () => {
         </div>
       )}
       
-      {activeSection === 'overview' && activeSubtab === 'posterior' && (
+      {activeSection === 'overview' && activeSubtab === 'Posterior' && (
         <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm mb-6">
           <h4 className="font-semibold text-gray-800 mb-4">Validação Posterior</h4>
           <p className="text-sm text-gray-600 mb-4">
-            A validação posterior ocorre após a implementação em produção, monitorando continuamente o desempenho 
+            A validação Posterior ocorre após a implementação em produção, monitorando continuamente o desempenho 
             do modelo em ambiente real e avaliando seu impacto nos resultados de negócio.
           </p>
           

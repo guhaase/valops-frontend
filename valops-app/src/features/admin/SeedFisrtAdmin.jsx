@@ -180,7 +180,7 @@ const SeedFirstAdmin = () => {
         
         <div className="mt-8 text-center text-sm text-gray-600">
           <p>Esta operação só pode ser realizada uma vez no sistema</p>
-          <p className="mt-2">O primeiro administrador poderá adicionar outros posteriormente</p>
+          <p className="mt-2">O primeiro administrador poderá adicionar outros Posteriormente</p>
         </div>
       </div>
     </div>

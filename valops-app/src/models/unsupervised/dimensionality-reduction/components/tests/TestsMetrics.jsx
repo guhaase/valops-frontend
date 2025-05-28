@@ -22,7 +22,7 @@ const TestsMetrics = () => {
       weaknesses: [
         'Menos relevante para métodos não-lineares',
         'Foco apenas na variância (pode ignorar estruturas importantes)',
-        'Não avalia diretamente a utilidade para tarefas posteriores',
+        'Não avalia diretamente a utilidade para tarefas Posteriores',
         'Pode superestimar a qualidade para dados ruidosos',
         'Assume que as direções de maior variância são as mais informativas'
       ],
